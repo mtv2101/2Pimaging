@@ -88,7 +88,10 @@ xlabel('time (20 frames)');
 ylabel('roi (ranked)');
 
 sub4 = subplot(3,3,4);
-jimage(sort_respo1_amp');
+cmin = nanmean(sort_respo1_amp(:))-(3*std(sort_respo1_amp(:),[],1));
+cmax = nanmean(sort_respo1_amp(:))+(3*std(sort_respo1_amp(:),[],1));
+imagesc(sort_respo1_amp', [cmin cmax]);
+set(gca,'YDir','normal');
 colormap(color_map);freezeColors;
 sub4cb = colorbar; set(sub4cb,'FontSize',8);
 colormap(color_map);cbfreeze(sub4cb);
@@ -97,7 +100,8 @@ xlabel('time (20 frames)');
 ylabel('roi (ranked)');
 
 sub5 = subplot(3,3,5);
-jimage(sort_respo2_amp');
+imagesc(sort_respo2_amp', [cmin cmax]);
+set(gca,'YDir','normal');
 colormap(color_map);freezeColors;
 sub5cb = colorbar; set(sub5cb,'FontSize',8);
 colormap(color_map);cbfreeze(sub5cb);
@@ -125,7 +129,10 @@ o2mean = squeeze(nanmean(allblock_o2(:,:,has_anyo2),3));
     o2mean_nonan = o2mean;
     o2mean_nonan(isnan(o2mean)) = 0; %remove NaNs because they screw up the std function
 o2error = std(o2mean_nonan,[],1)/sqrt(size(o2mean_nonan,1));
-jimage(o1mean);
+cmin2 = nanmean(o1mean(:))-(3*std(o1mean_nonan(:),[],1));
+cmax2 = nanmean(o1mean(:))+(3*std(o1mean_nonan(:),[],1));
+imagesc(o1mean_nonan, [cmin2 cmax2]);
+set(gca,'YDir','normal');
 sub7cb = colorbar; colormap(redblue);set(sub7cb,'FontSize',8);
 cbfreeze(sub7cb);freezeColors;
 title('Odor A df/f of rois with significant response');
@@ -133,7 +140,8 @@ xlabel('time (frames)');
 ylabel('trial');
 
 sub8 = subplot(3,3,8);
-jimage(o2mean);
+imagesc(o2mean_nonan, [cmin2 cmax2]);
+set(gca,'YDir','normal');
 sub8cb = colorbar; set(sub8cb,'FontSize',8);cbfreeze(sub8cb);
 colormap(redblue);freezeColors;
 title('Odor B df/f of rois with significant response');
@@ -146,12 +154,14 @@ shadedErrorBar([],nanmean(o2mean,1), o2error,  {'color', [1, 0.5, 0.2]}, 1);hold
 axis tight;
 xLimits = get(sub9,'XLim');
 yLimits = get(sub9,'YLim');
-h = patch([100; 100; 130; 130], [yLimits(1); yLimits(2); yLimits(2); yLimits(1);], [.7 .7 .7]);
+h = patch([120; 120; 150; 150], [yLimits(1); yLimits(2); yLimits(2); yLimits(1);], [.7 .7 .7]);
 set(h, 'FaceAlpha', .4, 'EdgeColor', 'none');
 hlegend = legend(mat2str(odor1), mat2str(odor2));
     hkids = get(hlegend,'Children');    %# Get the legend children
     htext = hkids(strcmp(get(hkids,'Type'),'text')); %# Select the legend children of type 'text'
-    set(htext,{'Color'},{[.5, .5, 1]; [1, 0.5, 0.2]});
+    set(htext,{'Color'},{[1, 0.5, 0.2]; [.5, .5, 1]});
+    leg_line=findobj(hlegend,'type','Line');
+    set(leg_line, {'Color'}, {[1, 0.5, 0.2]; [.5, .5, 1]});
 title('A vs. B mean df/f of ROIs with significant response to baseline');
 xlabel('time (frames)');
 ylabel('df/f');

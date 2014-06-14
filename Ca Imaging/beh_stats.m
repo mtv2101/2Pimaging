@@ -11,8 +11,7 @@ for n = 1:numel(fields) % for each odor/bnehavior pair
 end
 
 for r = 1:size(allblocks_parsed.(fields{1}), 3) %for each roi
-    baseline = 1:preframes;
-    n=1;
+    baseline = 20:preframes; %start at frame 20 to avoid trial-start evoked activity
     for n=1:numel(fields)
         if hasdata(n) == 0
             ALLDAYS(day).stats(r).p(:,n) = nan(pre_x+post_x,1);
@@ -26,8 +25,8 @@ for r = 1:size(allblocks_parsed.(fields{1}), 3) %for each roi
                 winstart = 1:sig_win:(preframes+postframes);
                 indx = winstart(w):(winstart(w)+sig_win-1);
                 roi_dat = allblocks_parsed.(fields{n}); % [trial, frame, roi]
-                roid_base = nanmean(roi_dat(:,baseline,r),2);
-                roid_sig = nanmean(roi_dat(:,indx,r),2);
+                roid_base = nanmean(roi_dat(:,baseline,r),2); %get mean df/f in timewindow "baseline"
+                roid_sig = nanmean(roi_dat(:,indx,r),2); %get mean df/f in timewindow "indx"
                 [h(w,n), beh_tune_p] = ttest2(roid_sig,roid_base);
                 ALLDAYS(day).stats(r).p(w,n) = beh_tune_p;
                 ALLDAYS(day).stats(r).sig_times(w,n) = h(w,n);

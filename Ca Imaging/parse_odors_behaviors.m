@@ -26,7 +26,7 @@ alpha = .01;
 postframes = sig_win*post_x;
 preframes = sig_win*pre_x;
 if postframes + preframes ~= triallen
-    fprintf 'Please choose different "postframes" or "preframes"';
+    fprintf 'Please choose different "postframes" or "preframes" or "sig_win"';
     break
 end
 cd(rootdir);
@@ -100,48 +100,50 @@ b4 = logical(b4);
 allblocks_parsed.o1b1 = [];allblocks_parsed.o1b2 = [];allblocks_parsed.o1b3 = [];
 allblocks_parsed.o1b4 = [];allblocks_parsed.o2b1 = [];allblocks_parsed.o2b2 = [];
 allblocks_parsed.o2b3 = [];allblocks_parsed.o2b4 = [];
+it1=1;it2=1;it3=1;it4=1;it5=1;it6=1;it7=1;it8=1;
+trial = 1;
 for b = BLOCKS
     alldff = ALLBLOCKS(b).dff;
-    it1=1;it2=1;it3=1;it4=1;it5=1;it6=1;it7=1;it8=1;
-    trial = 1;
+    btrial = 1; %block trial
     % create seperate matrices for each odor
     for x = 1:size(ALLBLOCKS(b).dff,1) %for each trial
         if ALLBLOCKS(b).rejtrial(x) == 1
             continue
         end            
         if b1(trial) && o1(trial)
-            o1b1_all(it1,:,:) = alldff(trial,:,:);
+            o1b1_all(it1,:,:) = alldff(btrial,:,:);
             allblocks_parsed.o1b1 = cat(1, allblocks_parsed.o1b1, o1b1_all(it1,:,:));
             it1=it1+1;
         elseif b2(trial) && o1(trial)
-            o1b2_all(it2,:,:) = alldff(trial,:,:);
+            o1b2_all(it2,:,:) = alldff(btrial,:,:);
             allblocks_parsed.o1b2 = cat(1, allblocks_parsed.o1b2, o1b2_all(it2,:,:));
             it2=it2+1;
         elseif b3(trial) && o1(trial)
-            o1b3_all(it3,:,:) = alldff(trial,:,:);
+            o1b3_all(it3,:,:) = alldff(btrial,:,:);
             allblocks_parsed.o1b3 = cat(1, allallblocks_parsed.o1b3block_o1b3, o1b3_all(it3,:,:));
             it3=it3+1;
         elseif b4(trial) && o1(trial)
-            o1b4_all(it4,:,:) = alldff(trial,:,:);
+            o1b4_all(it4,:,:) = alldff(btrial,:,:);
             allblocks_parsed.o1b4 = cat(1, allblocks_parsed.o1b4, o1b4_all(it4,:,:));
             it4=it4+1;
         elseif b1(trial) && o2(trial)
-            o2b1_all(it5,:,:) = alldff(trial,:,:);
+            o2b1_all(it5,:,:) = alldff(btrial,:,:);
             allblocks_parsed.o2b1 = cat(1, allblocks_parsed.o2b1, o2b1_all(it5,:,:));
             it5=it5+1;
         elseif b2(trial) && o2(trial)
-            o2b2_all(it6,:,:) = alldff(trial,:,:);
+            o2b2_all(it6,:,:) = alldff(btrial,:,:);
             allblocks_parsed.o2b2 = cat(1, allblocks_parsed.o2b2, o2b2_all(it6,:,:));
             it6=it6+1;
         elseif b3(trial) && o2(trial)
-            o2b3_all(it7,:,:) = alldff(trial,:,:);
+            o2b3_all(it7,:,:) = alldff(btrial,:,:);
             allblocks_parsed.o2b3 = cat(1, allblocks_parsed.o2b3, o2b3_all(it7,:,:));
             it7=it7+1;
         elseif b4(trial) && o2(trial)
-            o2b4_all(it8,:,:) = alldff(trial,:,:);
+            o2b4_all(it8,:,:) = alldff(btrial,:,:);
             allblocks_parsed.o2b4 = cat(1, allblocks_parsed.o2b4, o2b4_all(it8,:,:));
             it8=it8+1;
         end
+        btrial = btrial+1;
         trial = trial+1;
         clear frmindx
     end  
