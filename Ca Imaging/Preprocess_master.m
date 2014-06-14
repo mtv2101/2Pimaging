@@ -29,7 +29,7 @@ xcorrthresh = 0.35; % reject images that correlate worse than this value
 %maxstep = .002; % maximum step length for the registration optimizer
 
 %%%%% BATCH LOAD TIF STACKS AND DO XYZ REGISTRATIONS WITH CH1
-rootdir = 'C:\Kurt\Pre-training study\031114-07\2014-05-09'; % full path to root directory of your tiff stacks
+rootdir = 'C:\Kurt\2014-06-05\Plus-lim vs min-lim'; % full path to root directory of your tiff stacks
 cd(rootdir);
 FullList = dir;
 ImgExtension = '.tif'; % specify image extension
