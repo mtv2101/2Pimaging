@@ -1,6 +1,6 @@
 %function [ROIS] = auditrois_pairs(data, similarity, cell_sig)
 
-similarity = .5;
+similarity = .8;
 rootdir = 'C:\Users\PMO\Desktop\Matt\ciasom code\New Code March 2014\Kurt code';
 cd(rootdir);
 DFF1 = load('DFF.mat');

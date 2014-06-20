@@ -1,4 +1,4 @@
-function [ALLDAYS, ALLBLOCKS] = beh_stats(ALLDAYS, ALLBLOCKS,...
+function [ALLDAYS, ALLBLOCKS] = beh_stats(day, ALLDAYS, ALLBLOCKS,...
     allblocks_parsed, post_x, pre_x, sig_win, alpha, postframes, preframes)
 
 fields = fieldnames(allblocks_parsed);
@@ -10,7 +10,7 @@ for n = 1:numel(fields) % for each odor/bnehavior pair
     end
 end
 
-for r = 1:size(ALLBLOCKS(1).dff, 3) %for each roi
+for r = 1:size(allblocks_parsed.(fields{1}), 3) %for each roi
     baseline = 20:preframes; %start at frame 20 to avoid trial-start evoked activity
     for n=1:numel(fields)
         if hasdata(n) == 0
@@ -34,10 +34,10 @@ for r = 1:size(ALLBLOCKS(1).dff, 3) %for each roi
                 ALLDAYS.stats(r).sem_times(w,n) = std(roid_sig)/sqrt(length(roid_sig));
                 clear roi_dat roid_base roid_sig
             end 
-            if any(ALLDAYS.stats(r).p < alpha) %if there are any chunks of time where a behavioral response is sig different
-                ALLDAYS.stats(r).sig_behaviors(n) = 1;
+            if any(ALLDAYS(day).stats(r).p < alpha) %if there are any chunks of time where a behavioral response is sig different
+                ALLDAYS(day).stats(r).sig_behaviors(n) = 1;
             else
-                ALLDAYS.stats(r).sig_behaviors(n) = 0;
+                ALLDAYS(day).stats(r).sig_behaviors(n) = 0;
             end
         end
     end

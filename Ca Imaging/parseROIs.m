@@ -12,11 +12,11 @@
 
 clear all
 
-rootdir = 'C:\Kurt\Pre-training study\031114-07\2014-04-25\Block3';
+rootdir = 'G:\Kurt\Training in Metch olfactometer study\031114-05\GC extracted data for all trials\2014-04-25\Odors1';
 cd(rootdir);
 load 'ALLBLOCKS.mat'
-Filenames = dir(['*wave_block_*']);
-base_win = [1:75]; %frames that define baseline for df/f
+Filenames = dir(['*wave_block*']);
+base_win = [20:100]; %frames that define baseline for df/f
 trial_reject = .5; %reject trials with more than this fraction of discarded frames
 
 for x = 1:length(ALLBLOCKS) %for each block

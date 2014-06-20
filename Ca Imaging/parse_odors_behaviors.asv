@@ -1,4 +1,4 @@
-function [ALLDAYS] =  parse_odors_behaviors(ALLBLOCKS, behaviors, odor1, odor2, beh_types)
+function [ALLDAYS] =  parse_odors_behaviors(sds)
 
 % run this after parseROIs
 % 2014-05-19 Code changed to remove loop bug when separating dff odor behaviors
@@ -7,29 +7,34 @@ function [ALLDAYS] =  parse_odors_behaviors(ALLBLOCKS, behaviors, odor1, odor2, 
 % 
 % figure out repeated measures errors
 
-BLOCKS = 1:length(ALLBLOCKS);
+clear all
 
-beh1 = beh_types{1}; %'HIT';
-beh2 = beh_types{2}; %'CR';
-beh3 = beh_types{3}; %'FA';
-beh4 = beh_types{4}; %'MISS';
+rootdir = 'G:\Kurt\Training in Metch olfactometer study\031114-05\2014-04-25\Block3';
+day = 1;
+BLOCKS = [1:1];
+odor1 = '6EB 4AA';
+odor2 = '4EB 6AA';
+beh1 = 'HIT';
+beh2 = 'CR';
+beh3 = 'FA';
+beh4 = 'MISS';
 ALLROI = 0; % if =1 plot all traces in all rois
 % OdorON = 120; % frame odor was delivered
 triallen = 300;
 sig_win = 20; % test for significant changes in windows of this size
-post_x = 10; % multiply sig_win by this to get number of post-baseline frames
-pre_x = 5;
+post_x = 11; % multiply sig_win by this to get number of post-baseline frames
+pre_x = 4;
 alpha = .01;
 postframes = sig_win*post_x;
 preframes = sig_win*pre_x;
 if postframes + preframes ~= triallen
     fprintf 'Please choose different "postframes" or "preframes" or "sig_win"';
-    return
+    break
 end
-%cd(rootdir);
+cd(rootdir);
 
-%load 'ALLBLOCKS.mat'
-%load 'behaviors.mat'
+load 'ALLBLOCKS.mat'
+load 'behaviors.mat'
 
 % find what odors are used on what trials
 o1_indx = regexp(behaviors, odor1);
@@ -146,12 +151,10 @@ for b = BLOCKS
     end  
 end
     
-[ALLDAYS, ALLBLOCKS] = odor_stats(ALLBLOCKS, allblocks_parsed, sig_win,...
+[ALLDAYS, ALLBLOCKS] = odor_stats(day, ALLBLOCKS, allblocks_parsed, sig_win,...
     post_x, pre_x, alpha, postframes, preframes);
 
-[ALLDAYS, ALLBLOCKS] = beh_stats(ALLDAYS, ALLBLOCKS,...
+[ALLDAYS, ALLBLOCKS] = beh_stats(day, ALLDAYS, ALLBLOCKS,...
     allblocks_parsed, post_x, pre_x, sig_win, alpha, postframes, preframes);
-
-ALLDAYS.allblocks = allblocks_parsed;
 
 end
