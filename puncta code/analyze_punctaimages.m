@@ -23,19 +23,19 @@ for n = 1:size(dat,2);
     lifetimes = cat(2, lifetimes, dat(n).puncta.lifetime);
     for m = 1:size(dat(n).allimg, 2)
         for k = 1:size(dat(n).allimg(m).img, 3)
-            if isempty(dat(n).allimg(m).img(:,:,k)) == 1
+            if isempty(dat(n).allimg(m).img(:,:,k)) == 1 %if image is filled with NaNs becuase it crosses fov border
             	continue
             end
-            if dat(n).puncta(m).firstobs > 0
-                firstobs = dat(n).puncta(m).firstobs;
-                img_first = cat(3, img_first, dat(n).allimg(m).img(:,:,firstobs));
+            if dat(n).puncta(m).firstobs > 1
+                %firstobs = dat(n).puncta(m).firstobs;
+                img_first = cat(3, img_first, dat(n).allimg(m).img(:,:,1)); 
             end
             if dat(n).puncta(m).firstobs + dat(n).puncta(m).lifetime < max(lifetimes);
                 if dat(n).puncta(m).firstobs + dat(n).puncta(m).lifetime ~= size(dat(n).allimg(m).img,3)
                     continue
                 end
-                lastobs = dat(n).puncta(m).firstobs + dat(n).puncta(m).lifetime;
-                img_last = cat(3, img_last, dat(n).allimg(m).img(:,:,lastobs));
+                %lastobs = dat(n).puncta(m).firstobs + dat(n).puncta(m).lifetime;
+                img_last = cat(3, img_last, dat(n).allimg(m).img(:,:,end));
             end
         end
     end
