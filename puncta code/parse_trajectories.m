@@ -66,18 +66,6 @@ for k = 1:obs %for each text file of maxima
     num_singles = sum_total_particles - puncta_intraj;
     numtraj = length(puncta);
     
-%     for n = 1:numtraj
-%         pun = find(Trajectory == n);
-%         lentraj = length(pun);
-%         traj = Trajectory(pun(1));
-%         cords = [];
-%         for m = 1:lentraj
-%              cords = cat(1,cords,[x(pun(m)), y(pun(m))]);
-%         end
-%         puncta(traj).xy = cords;
-%         puncta(traj).lifetime = lentraj;
-%     end
-    
    
     for n = 1:numtraj
         ltime_cumhist(n) = puncta(n).lifetime-1;
