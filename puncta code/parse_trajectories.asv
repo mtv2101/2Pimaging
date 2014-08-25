@@ -1,7 +1,8 @@
 clear all;
 
-rootdir = 'C:\Users\supersub\Desktop\Data\text files\10min controls';
+rootdir = 'C:\Users\supersub\Desktop\Data\text files\MC lateral';
 isize = 5; %radius of image kernal to take around each puncta
+days = (1:4); %days to analyze
 
 cd(rootdir);
 FullList = dir;
@@ -46,13 +47,14 @@ for k = 1:obs %for each text file of maxima
             puncta(t).lifetime = length(x) - traj_start_indx(t);
         else
             puncta(t).lifetime = traj_start_indx(t+1)-3 - traj_start_indx(t);
+            puncta(t).framesobs = str2double(frame{traj_start_indx(t)})
             %puncta(t).lifetime = str2double(frame{traj_start_indx(t+1)-3}); % go backwards from next trajectory to get current trajectory's lifetime
         end
         %for n = 1:puncta(t).lifetime
             %puncta(t).x(n) = str2double(x{traj_start_indx(t+n-1)});
             %puncta(t).y(n) = str2double(y{traj_start_indx(t+n-1)});
         %end
-        puncta(t).firstobs = str2double(frame{traj_start_indx(t)})+1;
+        puncta(t).firstobs = str2double(frame{traj_start_indx(t)})+1;        
     end
     
     % open .tif file of image
@@ -70,7 +72,7 @@ for k = 1:obs %for each text file of maxima
     
    
     for n = 1:numtraj
-        ltime_cumhist(n) = puncta(n).lifetime-1;
+        ltime_cumhist(n) = puncta(n).lifetime;
     end
     %ltime_cumhist = cat(2, ltime_cumhist, zeros(1,num_singles)); %add non-trajectory single particles to cumulative histogram
     cumhist = ecdf(ltime_cumhist, 'function', 'survivor');
@@ -105,9 +107,12 @@ all_lifetimes = [];
 for k = 1:obs
     all_lifetimes = cat(2, all_lifetimes, allpuncta(k).lifetimes);
     all_cumhist = allpuncta(k).cumhist;
-    plot(all_cumhist(2:end-1), 'k'); ylim([0 1]); hold on;
+    plot(all_cumhist(2:end-1), 'k'); ylim([0 1]); hold on;    
+    fitx = 1:(length(all_cumhist)-2);
+    fity = all_cumhist(2:end-1)';
+    fitcoeffs(:,k) = polyfit(fitx, fity, 1);
+    %regresscoeffs(:,k) = regress(fity', fitx');
     clear all_cumhist;
-    fit = polyfit(x, v
 end
 [cumhist xaxis upconfidence downconfidence] = ecdf(all_lifetimes, 'bounds', 'on');
 output = [cumhist, xaxis, upconfidence, downconfidence];
