@@ -1,8 +1,7 @@
 clear all;
 
-rootdir = 'C:\Users\supersub\Desktop\Data\text files\MC lateral';
+rootdir = 'C:\Users\supersub\Desktop\Data\text files\10min controls';
 isize = 5; %radius of image kernal to take around each puncta
-days = (1:4); %days to analyze
 
 cd(rootdir);
 FullList = dir;
@@ -71,7 +70,7 @@ for k = 1:obs %for each text file of maxima
     
    
     for n = 1:numtraj
-        ltime_cumhist(n) = puncta(n).lifetime;
+        ltime_cumhist(n) = puncta(n).lifetime-1;
     end
     %ltime_cumhist = cat(2, ltime_cumhist, zeros(1,num_singles)); %add non-trajectory single particles to cumulative histogram
     cumhist = ecdf(ltime_cumhist, 'function', 'survivor');
@@ -106,12 +105,9 @@ all_lifetimes = [];
 for k = 1:obs
     all_lifetimes = cat(2, all_lifetimes, allpuncta(k).lifetimes);
     all_cumhist = allpuncta(k).cumhist;
-    plot(all_cumhist(2:end-1), 'k'); ylim([0 1]); hold on;    
-    fitx = 1:(length(all_cumhist)-2);
-    fity = all_cumhist(2:end-1)';
-    fitcoeffs(:,k) = polyfit(fitx, fity, 1);
-    %regresscoeffs(:,k) = regress(fity', fitx');
+    plot(all_cumhist(2:end-1), 'k'); ylim([0 1]); hold on;
     clear all_cumhist;
+    fit = polyfit(x, v
 end
 [cumhist xaxis upconfidence downconfidence] = ecdf(all_lifetimes, 'bounds', 'on');
 output = [cumhist, xaxis, upconfidence, downconfidence];
