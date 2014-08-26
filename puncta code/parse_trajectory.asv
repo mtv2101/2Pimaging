@@ -8,7 +8,7 @@ FullList = dir;
 MaximaList = dir(['*.txt']);
 roi = length(MaximaList); %number of rois
 
-days_toanalyze = (1:8); % later compare this to total dataset size and skip rois that have remainder < 4 
+days_toanalyze = (1:4); % later compare this to total dataset size and skip rois that have remainder < 4 
 
 for k = 1:roi %for each text file of maxima
     maximaname = MaximaList(k).name;
@@ -46,27 +46,30 @@ for k = 1:roi %for each text file of maxima
     traj_idx = parens(1:2:end)+2; %every other "%%" marks trajectory start
     traj_idx = cat(1, 1, traj_idx);
         
-    for t = 1:length(traj_idx) %for all trajectories
+    for t = 1:length(traj_idx) %for each trajectory
+        if t == length(traj_idx)
+            %puncta(t).lifetime = length(x) - traj_idx(t);
+            puncta(t).framesobs = str2double(frame(traj_idx(t):end));
+        else
+            %puncta(t).lifetime = traj_idx(t+1)-3 - traj_idx(t);
+            puncta(t).framesobs = str2double(frame(traj_idx(t):(traj_idx(t+1)-3)));
+        end
         firstobs = str2double(frame{traj_idx(t)});
         if firstobs <= max(days_toanalyze)
             puncta_interest(t) = 1;
         else
             puncta_interest(t) = 0;
         end
-        %puncta(t).firstobs = firstobs;
-        %puncta(t).interesting = puncta_interest(t); % choose just those trajectories that exist within the days of interest
+        puncta(t).firstobs = firstobs;
+        puncta(t).interesting = puncta_interest(t); % choose just those trajectories that exist within the days of interest
     end
-    interest_indx = find(puncta_interest==1);
     
-    for t = interest_indx % build structure using only trajectories of interest
-        if t == length(interest_indx)
-            puncta(t).lifetime = length(x) - traj_idx(t);
-            puncta(t).framesobs = str2double(frame(traj_idx(t):end));
-        else
-            puncta(t).lifetime = traj_idx(t+1)-3 - traj_idx(t);
-            puncta(t).framesobs = str2double(frame(traj_idx(t):(traj_idx(t+1)-3)));
-        end
-        %puncta(t).lifetime = traj_idx(t+1)-3 - traj_idx(t);
+    for t = interest_indx
+        puncta(t).lifetime = traj_idx(t+1)-3 - traj_idx(t);
+    end
+    
+    for p = 1:length(puncta)
+        ave_len(p) = puncta(p).lifetime;
     end
     
     allpuncta_intraj = [];
@@ -78,10 +81,7 @@ for k = 1:roi %for each text file of maxima
     end
     
     sum_total_particles = sum(str2double(total_particles(days_toanalyze)));
-    totpuncta_intraj = sum(allpuncta_intraj);      
-    %for p = interest_indx
-    %    ave_len(p) = puncta(p).lifetime;
-    %end
+    totpuncta_intraj = sum(allpuncta_intraj);        
     %mean_ave_len = mean(ave_len+1);
     %puncta_intraj = mean_ave_len*length(traj_s); % = average traj length * num trajectories
     %num_singles = sum_total_particles - totpuncta_intraj;
@@ -98,9 +98,8 @@ for k = 1:roi %for each text file of maxima
     allpuncta(k).cumhist = cumhist;
     allpuncta(k).lifetimes = ltime_cumhist;
     allpuncta(k).puncta_matrix = pun;
-    allpuncta(k).puncta_interest = puncta_interest;
     
-    clear puncta cumhist lentraj ltime_cumhist frame parens traj_idx puncta_interest interest_indx pun
+    clear puncta cumhist lentraj ltime_cumhist frame parens traj_idx puncta_interest interest_indx
 end
 
 all_lifetimes = [];
