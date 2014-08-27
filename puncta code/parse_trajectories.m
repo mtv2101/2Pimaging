@@ -1,9 +1,9 @@
 clear all;
 
-rootdirs = {'C:\Users\supersub\Desktop\Data\text files\TC lateral enriched',...
-    'C:\Users\supersub\Desktop\Data\text files\TC lateral non-enriched',...
+rootdirs = {'C:\Users\supersub\Desktop\Data\text files\MC lateral enriched',...
+    'C:\Users\supersub\Desktop\Data\text files\MC lateral non-enriched',...
     'C:\Users\supersub\Desktop\Data\text files\10min controls'};
-days = [1:8]; %days to analyze
+days = [4:8]; %days to analyze
 
 plotcolors = {'k', 'r', 'b'};
 
@@ -20,6 +20,7 @@ for d = 1:size(days,1)
             fitx = 1:(size(all_cumhist,1)-2);
             fity = all_cumhist(2:end-1)'; %dont fit to single puncta (non trajectory puncta)
             condition(n).allpuncta(k).fitcoeffs = polyfit(fitx, fity, 1);
+            stats(n).slopes(k) = condition(n).allpuncta(k).fitcoeffs(1);
             clear all_cumhist
         end
     condition(n).length = pathlengths(condition(n).allpuncta);
@@ -28,10 +29,13 @@ for d = 1:size(days,1)
     end
 end
 
+%%%% plotting %%%%
 figure;
 for n = 1:length(rootdirs)
     h = cdfplot(condition(n).length); hold on;    
     %h = get(gca, 'children');
     set(h,'Color',plotcolors{n});   
-    xlim([0 10]);    
+    xlim([0 10]);  
 end
+%boxplot(slopes, 'colors', 'krb', 'notch', 'on');
+%anova1([stats(1).slopes', stats(2).slopes', stats(3).slopes']);

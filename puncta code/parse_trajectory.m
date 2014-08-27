@@ -70,9 +70,9 @@ for k = 1:roi %for each text file of maxima
             ally(n) = str2double(y{traj_idx(t)+n-1});
             allz(n) = str2double(z{traj_idx(t)+n-1});
         end
-        puncta(t).x = allx(fr_intsect-framesobs(1)+1);
-        puncta(t).y = ally(fr_intsect-framesobs(1)+1);
-        puncta(t).z = allz(fr_intsect-framesobs(1)+1);
+        puncta(t).x = allx(fr_intsect);
+        puncta(t).y = ally(fr_intsect);
+        puncta(t).z = allz(fr_intsect);
         clear allx ally allz framesobs framesobs_offset framesobs_intersect
     end
     
