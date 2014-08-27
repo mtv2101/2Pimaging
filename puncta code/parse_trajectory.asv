@@ -63,16 +63,16 @@ for k = 1:roi %for each text file of maxima
         if length(framesobs_offset) == 1
             framesobs_offset = [];
         end
-        puncta(t).framesobs = framesobs_offset;  
-        [nn, fr_intsect, nm] = intersect(framesobs, days_toanalyze-1); %get index of only days that have trajectories that are in desired date range
-        for n = 1:length(framesobs)            
+        puncta(t).framesobs = framesobs_offset;        
+        for n = 1:length(framesobs)
+            framesobs_intersect(n) = find(framesobs(n)+1==days_toanalyze-1); %get index of only days that have trajectories that are in desired date range
             allx(n) = str2double(x{traj_idx(t)+n-1});
             ally(n) = str2double(y{traj_idx(t)+n-1});
             allz(n) = str2double(z{traj_idx(t)+n-1});
         end
-        puncta(t).x = allx(fr_intsect-framesobs(1)+1);
-        puncta(t).y = ally(fr_intsect-framesobs(1)+1);
-        puncta(t).z = allz(fr_intsect-framesobs(1)+1);
+        puncta(t).x = allx(framesobs_intersect-framesobs(1)+1);
+        puncta(t).y = ally(framesobs_intersect-framesobs(1)+1);
+        puncta(t).z = allz(framesobs_intersect-framesobs(1)+1);
         clear allx ally allz framesobs framesobs_offset framesobs_intersect
     end
     
