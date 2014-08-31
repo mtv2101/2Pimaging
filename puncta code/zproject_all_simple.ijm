@@ -1,5 +1,5 @@
-input = "C:\\Users\\supersub\\Desktop\\Data\\2.8\\warped\\";
-output = "C:\\Users\\supersub\\Desktop\\Data\\2.8\\rois\\9\\";
+input = "C:\\Users\\supersub\\Desktop\\Data\\2.1\\warped\\";
+output = "C:\\Users\\supersub\\Desktop\\Data\\2.1\\rois\\9\\";
 
 setBatchMode(true); 
 list1 = getFileList(input);
@@ -18,15 +18,15 @@ run("StackReg", "transformation=[Rigid Body]");
 //run("Enhance Contrast...", "saturated=0.1 normalize process_all");
 saveAs("tif", output + "2dtseries_");
 
-run("Particle Tracker 2D/3D", "radius=3 cutoff=0 per/abs=1 link=1 displacement=8");
-}
+//run("Particle Tracker 2D/3D", "radius=3 cutoff=0 per/abs=1 link=1 displacement=8");
+
 
 
 function action1(input, output, filename) {
         open(input + filename);
         roiManager("Select", 0);
         run("Crop");
-        run("Slice Keeper", "first=114 last=143 increment=1");
+        run("Slice Keeper", "first=106 last=126 increment=1");
         run("Z Project...", "projection=[Max Intensity]");
         saveAs("tif", output + filename);
         close();
