@@ -1,7 +1,6 @@
-masterlist = "C:\\Users\\supersub\\Desktop\\Data\\filelist_MASTER.txt";
+masterlist = "C:\\Users\\supersub\\Desktop\\Data\\filelist_MASTER_test.txt";
 aggregate_folder = "C:\\Users\\supersub\\Desktop\\Data\\aggregate_all\\";
 
-//pathfile=File.openDialog("Choose the file to Open:"); 
 filestring=File.openAsString(masterlist); 
 rows=split(filestring, "\n"); 
 dendrite_id=newArray(rows.length);
@@ -34,14 +33,15 @@ for (n = 0; n < listin.length; n++)
 setBatchMode(false);
 close();
 
-//for (k = 0; k < listout .length; k++)
-//        open(output[i] + listout [k]);
-//setBatchMode(false);
-//run("Images to Stack");
+listtemp= getFileList(tempdir);
+for (k = 0; k < listtemp.length; k++)
+        open(tempdir + listtemp[k]);
+setBatchMode(false);
+run("Images to Stack");
 //run("StackReg", "transformation=[Rigid Body]");
-//run("Subtract Background...", "rolling=15 sliding stack");
-//run("Enhance Contrast...", "saturated=0.1 normalize process_all");
-//saveAs("tif", tempdir + "2dtseries_" + dendrite_id);
+run("Subtract Background...", "rolling=15 sliding stack");
+saveAs("tif", tempdir + dendrite_id[i] + " 2dtseries");
+close();
 
 //run("Particle Tracker 2D/3D", "radius=3 cutoff=0 per/abs=1 link=1 displacement=8");
 }
@@ -58,7 +58,6 @@ function action1(input, output, filename, listout, string, dendrite_id, tempdir)
       	run("Z Project...", "projection=[Max Intensity]");
        	name = replace(filename, '.tif', '');
         	saveAs("tif", tempdir + dendrite_id + "_" + name);
-	saveAs("tif", aggregate_folder + dendrite_id + "_" + name);
 	roiManager("reset")
         	close();
 }
