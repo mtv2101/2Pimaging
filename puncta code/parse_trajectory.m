@@ -44,38 +44,45 @@ for k = 1:roi %for each text file of maxima
     traj_idx = cat(1, 1, traj_idx);
     
     for t = 1:length(traj_idx) %for all trajectories
-        firstobs = str2double(frame{traj_idx(t)});
+        %firstobs = str2double(frame{traj_idx(t)});
         if t == length(traj_idx)
             framesobs = str2double(frame(traj_idx(t):end));
         else
             framesobs = str2double(frame(traj_idx(t):(traj_idx(t+1)-3))); %subtract 3 to index past the two "%%" marks
         end
-        framesobs_offset = framesobs - days_toanalyze(1)+2; %shift so first frame eq 1 - add 2 because we call day 1 as 1 even though mosaic calls it day0
-        framesobs_offset(framesobs_offset <= 0) = []; % if observation before first day, make null
-        framesobs_offset(framesobs_offset > length(days_toanalyze)) = [];
-        if length(framesobs_offset) == 1 || ~isnumeric(framesobs_offset)
-            framesobs_offset = [];
-        end
-        puncta(t).framesobs = framesobs_offset;  
-    end
-    
-    i=0;
-    for t = 1:length(puncta)
-        if isnumeric(puncta(t).framesobs(1)) %skip trajectories that are set to [];
-            [nn, fr_intsect, nm] = intersect(puncta(t).framesobs, days_toanalyze); %get index of only days that have trajectories that are in desired date range
-            for n = 1:length(puncta(t).framesobs)
+        framesobs = framesobs + 1; %add 1 so that first observation is day 1 not day 0
+        %         framesobs_offset = framesobs - days_toanalyze(1)+2; %shift so first frame eq 1 - add 2 because we call day 1 as 1 even though mosaic calls it day0
+        %         framesobs_offset(framesobs_offset <= 0) = []; % if observation before first day, make null
+        %         framesobs_offset(framesobs_offset > length(days_toanalyze)) = [];
+        %         if length(framesobs_offset) == 1 || ~isnumeric(framesobs_offset) % trajectories that extend beyond last day (i.e. day 1:4, traj 4:6) are right censored and treated the same as a single observation.  This makes day 1:4 treated the same as day 4:8
+        %             framesobs_offset = [];
+        %         end
+        %         puncta(t).framesobs = framesobs_offset;
+        %     end
+        %
+        %     i=0;
+        %     for t = 1:length(puncta)
+        %if length(puncta(t).framesobs) > 1 %skip trajectories that are set to [];
+        
+        %[nn, fr_intsect, nm] = intersect(puncta(t).framesobs, days_toanalyze); %get index of only days that have trajectories that are in desired date range
+        [nn, fr_intsect, nm] = intersect(framesobs, days_toanalyze);
+        if length(fr_intsect) >= 1
+            for n = 1:length(framesobs)
                 allx(n) = str2double(x{traj_idx(t)+n-1});
                 ally(n) = str2double(y{traj_idx(t)+n-1});
                 allz(n) = str2double(z{traj_idx(t)+n-1});
             end
+            puncta(t).allframes = framesobs;
+            puncta(t).framesobs = framesobs(fr_intsect);
+            puncta(t).fr_intsect = fr_intsect;
             puncta(t).x = allx(fr_intsect);
             puncta(t).y = ally(fr_intsect);
-            puncta(t).z = allz(fr_intsect);            
-            i=i+1;
-            numtrajs = i;
-        end            
-    end    
-    puncta = puncta(1:numtrajs);
+            puncta(t).z = allz(fr_intsect);
+            %i=i+1;
+            %numtrajs = i;
+        end
+    end
+    %puncta = puncta(1:numtrajs);
     
     allpuncta_intraj = [];
     for d = 1:days_toanalyze(end)-1 %dont iterate to last day which is all single
@@ -90,13 +97,16 @@ for k = 1:roi %for each text file of maxima
     num_singles = sum_total_particles - totpuncta_intraj;
     
     for n = 1:length(puncta) %length puncta may be shorter than traj_indx because some puncta lie aoutside day range
-        ltime_cumhist(n) = length(puncta(n).framesobs); % get lifetime
+        ltime_cumhist(n) = length(puncta(n).framesobs); % get lifetimes, over 4 observations max lifetime is 3 days
+        if puncta(n).framesobs(end) == days_toanalyze(end)
+            censor_vec(n) = 1; % note whenever the trajectory hits the "wall" (is right censored)
+        else
+            censor_vec(n) = 0; 
+        end
     end
-    %ltime_cumhist(ltime_cumhist > max(days_toanalyze)) = 4; %force liftimes into 4-day format
-    %ltime_cumhist(ltime_cumhist < min(days_toanalyze)) = 1;
-    
-    %ltime_cumhist = cat(2, ltime_cumhist, zeros(1,num_singles)); %add non-trajectory single particles to cumulative histogram
-    cumhist = ecdf(ltime_cumhist, 'function', 'survivor');
+    censor_vec = logical(cat(2, censor_vec, zeros(1, num_singles)));    
+    ltime_cumhist = cat(2, ltime_cumhist, ones(1, num_singles)); %add non-trajectory single particles to cumulative histogram
+    cumhist = ecdf(ltime_cumhist, 'function', 'survivor', 'censoring', censor_vec);
     
     allpuncta(k).puncta = puncta;
     allpuncta(k).maximaname = maximaname;
@@ -104,10 +114,11 @@ for k = 1:roi %for each text file of maxima
     allpuncta(k).lifetimes = ltime_cumhist;
     allpuncta(k).puncta_matrix = pun;
     allpuncta(k).numsingles = num_singles;
+    allpuncta(k).propsingle = length(puncta);
     
     roi_valid(k) = k;
     roi_valid(roi_valid==0) = [];
-    clear dataarray puncta cumhist lentraj ltime_cumhist frame parens traj_idx allpuncta_intraj pun
+    clear dataarray puncta cumhist lentraj ltime_cumhist frame parens traj_idx allpuncta_intraj pun censor_vec
 end
 %
 % all_lifetimes = [];

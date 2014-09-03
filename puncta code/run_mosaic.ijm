@@ -1,5 +1,5 @@
 masterlist = "C:\\Users\\supersub\\Desktop\\Data\\filelist_MASTER.txt";
-groupfolders =  "C:\\Users\\supersub\\Desktop\\Data\\text files\\2cutoff 8disp\\";
+groupfolders =  "C:\\Users\\supersub\\Desktop\\Data\\text files\\1cutoff 12disp\\";
 
 filestring=File.openAsString(masterlist); 
 rows=split(filestring, "\n"); 
@@ -19,7 +19,7 @@ listout = getFileList(group_folder);
 for (k = 0; k < listout.length; k++) {
 	if (1 == matches(listout[k], dendrite_id + " 2dtseries_norm.tif")) {
 	open(group_folder + listout[k]);
-	run("Particle Tracker 2D/3D", "radius=3 cutoff=0 per/abs=2 link=1 displacement=8");
+	run("Particle Tracker 2D/3D", "radius=3 cutoff=0 per/abs=1 link=1 displacement=8");
 	}
 }
 

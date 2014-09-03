@@ -1,6 +1,6 @@
 masterlist = "C:\\Users\\supersub\\Desktop\\Data\\filelist_MASTER.txt";
 inputfolder = "C:\\Users\\supersub\\Desktop\\Data\\aggregate_all\\normalized\\";
-groupfolders =  "C:\\Users\\supersub\\Desktop\\Data\\text files\\2cutoff 8disp\\";
+groupfolders =  "C:\\Users\\supersub\\Desktop\\Data\\text files\\1cutoff 12disp\\";
 
 allfiles = getFileList(inputfolder);
 filestring=File.openAsString(masterlist); 
@@ -16,7 +16,7 @@ setBatchMode(true);
 
 for (n = 0; n < allfiles.length; n++) {
 	if (1 == startsWith(allfiles[n], dendrite_id + " ")) {
-	open(allfiles[n]);
+	open(inputfolder + allfiles[n]);
 	}
 }
 

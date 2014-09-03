@@ -1,12 +1,12 @@
 clear all;
 
-rootdirs = {'C:\Users\supersub\Desktop\Data\text files\2cutoff 8disp\all_latden',...
+rootdirs = {'C:\Users\supersub\Desktop\Data\text files\1cutoff 4disp\all_latden',...
+    'C:\Users\supersub\Desktop\Data\text files\1cutoff 6disp\all_latden',...
     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\all_latden',...
-    'C:\Users\supersub\Desktop\Data\text files\0.7cutoff 8disp\all_latden',...
-    'C:\Users\supersub\Desktop\Data\text files\0.5cutoff 8disp\all_latden',...
-    'C:\Users\supersub\Desktop\Data\text files\0.3cutoff 8disp\all_latden'};
+    'C:\Users\supersub\Desktop\Data\text files\1cutoff 10disp\all_latden',...
+    'C:\Users\supersub\Desktop\Data\text files\1cutoff 12disp\all_latden'};
 days = [1:4; 1:4; 1:4; 1:4; 1:4]; %days to analyze
-groupnames = {'2.0cutoff 8disp', '1.0cutoff 8disp', '0.7cutoff 8disp', '0.5cutoff 8disp', '0.3cutoff 8disp'}; %these names have to be the same number of characters
+groupnames = {'4 disp' '6 disp' '8 disp' '10disp' '12disp'}; %these names must be the same number of characters
 
 %% plotcolors = {'k', 'r', 'b'};
 plotcolors = [31 119 180; 255 127 14; 44 160 44; 214 39 40; 148 103 189; 140 86 75;...
@@ -19,11 +19,11 @@ for n = 1:length(rootdirs)
     for k = roi
         all_lifetimes = cat(2, all_lifetimes, condition(n).allpuncta(k).lifetimes);
         all_cumhist = condition(n).allpuncta(k).cumhist;
-        plot(all_cumhist(1:end-1), 'Color', plotcolors(n,:)); ylim([0 1]); hold on;
+        plot(all_cumhist(1:end), 'Color', plotcolors(n,:)); ylim([0 1]); hold on;
         title(['Trajectory lifetimes over day ' mat2str(days(n,:))]);
-        fitx = 0:(size(all_cumhist,1)-2);
-        fity = all_cumhist(1:end-1)'; %dont fit to single puncta (non trajectory puncta)
-        condition(n).allpuncta(k).fitcoeffs = polyfit(fitx, fity, 1);
+        fitx = 2:(size(all_cumhist,1));
+        fity = all_cumhist(2:end)'; %dont fit to single puncta (non trajectory puncta)
+        condition(n).allpuncta(k).fitcoeffs = polyfit(fitx, fity, 1); %linear fit
         stats(n).slopes(k) = condition(n).allpuncta(k).fitcoeffs(1);
         clear all_cumhist
     end
@@ -33,16 +33,33 @@ for n = 1:length(rootdirs)
 end
 
 %%%% plotting %%%%
+%plot all cum lifetimes
 figure;
 for n = 1:length(rootdirs)
     h = cdfplot(condition(n).length); hold on;
-    %h = get(gca, 'children');
     set(h,'Color',plotcolors(n,:));
-    xlim([0 10]);
+    xlim([0 12]);
 end
-%boxplot(slopes, 'colors', 'krb', 'notch', 'on');
-names = [repmat(groupnames{1}, length(stats(1).slopes), 1); repmat(groupnames{2}, length(stats(2).slopes), 1);...
-    repmat(groupnames{3}, length(stats(3).slopes), 1); repmat(groupnames{4}, length(stats(4).slopes), 1);...
-    repmat(groupnames{5}, length(stats(5).slopes), 1)];
-[p,table,stats] = anova1([stats(1).slopes'; stats(2).slopes'; stats(3).slopes'; stats(4).slopes'; stats(5).slopes'], names);
-figure; c = multcompare(stats);
+
+%plot all proportion of singles
+for n = 1:length(rootdirs)
+    if n == 1
+        propsingle_names = repmat(groupnames{n}, length([condition(n).allpuncta.propsingle]), 1);
+        anova_singles = [condition(n).allpuncta.propsingle]';
+    else
+        propsingle_names = vertcat(propsingle_names, repmat(groupnames{n}, length([condition(n).allpuncta.propsingle]), 1));
+        anova_singles = vertcat(anova_singles, [condition(n).allpuncta.propsingle]');
+    end
+end
+singles_p = anova1(anova_singles, propsingle_names);
+
+for n = 1:length(rootdirs)
+    if n == 1
+        slope_names = repmat(groupnames{n}, length(stats(n).slopes),1);
+        anova_slopes = stats(n).slopes';
+    else
+        slope_names = vertcat(slope_names, repmat(groupnames{n}, length(stats(n).slopes),1));
+        anova_slopes = vertcat(anova_slopes, stats(n).slopes');
+    end    
+end
+slopes_p = anova1(anova_slopes, slope_names);
