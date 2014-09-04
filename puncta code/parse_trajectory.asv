@@ -54,9 +54,6 @@ for k = 1:roi %for each text file of maxima
             framesobs = str2double(frame(traj_idx(t):(traj_idx(t+1)-3))); %subtract 3 to index past the two "%%" marks
         end
         framesobs = framesobs + 1; %add 1 so that first observation is day 1 not day 0
-        if ~intersect(framesobs, days_toanalyze); % must assume first day is always day 1
-            continue % skip to next .txt file
-        else
         %         framesobs_offset = framesobs - days_toanalyze(1)+2; %shift so first frame eq 1 - add 2 because we call day 1 as 1 even though mosaic calls it day0
         %         framesobs_offset(framesobs_offset <= 0) = []; % if observation before first day, make null
         %         framesobs_offset(framesobs_offset > length(days_toanalyze)) = [];
@@ -92,7 +89,7 @@ for k = 1:roi %for each text file of maxima
     %puncta = puncta(1:numtrajs);
     
     allpuncta_intraj = [];
-    for d = 1:days_toanalyze(length(days_toanalyze)-1) %dont iterate to last day which is all single
+    for d = 1:days_toanalyze(end)-1 %dont iterate to last day which is all single
         for n = 1:length(puncta)
             pun(d,n) = length(find(puncta(n).framesobs == d)); % get each roi with a puncta detected that day            
         end
