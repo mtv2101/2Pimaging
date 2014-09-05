@@ -39,8 +39,11 @@ for k = 1:roi %for each text file of maxima
     total_particles = total_particles(total_indxs+1);
     total_particles = str2double(total_particles(1:length(total_particles)/2)); % cut out text data trailing particle data
     total_days = length(total_particles); % detecting the number of days (frames)
-    if isempty(intersect(days_toanalyze, 1:total_days)) % must assume first day is always day 1
+    day_index = intersect(days_toanalyze, 1:total_days);
+    if isempty(day_index) % must assume first day is always day 1
         continue % skip to next .txt file
+    elseif length(day_index) == 1
+        continue        
     end
     
     parens = strmatch('%%', frame);
@@ -81,13 +84,15 @@ for k = 1:roi %for each text file of maxima
         end
     end
     allpuncta_intraj = sum(sum(pun,2),1);
-    sum_total_particles = sum(total_particles(days_toanalyze(1):days_toanalyze(end-1))); % dont get trajectories from last day - single also not counted from last day
+    sum_total_particles = sum(total_particles(day_index(1):day_index(end)-1)); % dont get trajectories from last day - single also not counted from last day
     num_singles = sum_total_particles - allpuncta_intraj;
     
     ni = 1;
     censor_vec = [];
-    for n = 1:length(puncta) %length puncta may be shorter than traj_indx because some puncta lie aoutside day range
+    for n = 1:length(puncta) %length puncta may be shorter than traj_indx because some puncta lie outside day range
         if isempty(puncta(n).framesobs)
+            continue
+        elseif puncta(n).allframesobs(end) == days_toanalyze(1) % if the trajectory starts on the last day of obseravation don't count it as a trajectory even if it was observed later.  This preserves symmetry of day 1-4 and day 5-8 boundry trajectories
             continue
         else
             ltime_cumhist(ni) = length(puncta(n).framesobs); % get lifetimes, over 4 observations max lifetime is 3 days
@@ -99,17 +104,16 @@ for k = 1:roi %for each text file of maxima
             ni=ni+1;
         end
     end
-%     if isempty(censor_vec)
-%         continue
-%     end
-    censor_vec = logical(cat(2, censor_vec, zeros(1, num_singles)));    
-    ltime_cumhist = cat(2, ltime_cumhist, ones(1, num_singles)); %add non-trajectory single particles to cumulative histogram
+
+    %censor_vec = logical(cat(2, censor_vec, zeros(1, num_singles)));    
+    %ltime_cumhist = cat(2, ltime_cumhist, ones(1, num_singles)); %add non-trajectory single particles to cumulative histogram
     cumhist = ecdf(ltime_cumhist, 'function', 'survivor', 'censoring', censor_vec);
     
     allpuncta(k).puncta = puncta;
     allpuncta(k).maximaname = maximaname;
     allpuncta(k).cumhist = cumhist;
     allpuncta(k).lifetimes = ltime_cumhist;
+    allpuncta(k).censor_vec = censor_vec;
     allpuncta(k).puncta_matrix = pun;
     allpuncta(k).numsingles = num_singles;
     allpuncta(k).propsingle = num_singles/length(puncta);

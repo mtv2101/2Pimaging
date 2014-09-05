@@ -1,7 +1,7 @@
 clear all;
 
-rootdirs = {'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\all_latden\',...
-    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\all_latden\',...
+rootdirs = {'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\all_latden_nonenriched\',...
+    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\all_latden_nonenriched\',...
     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\10min_control\'};
 days = [1:4; 5:8; 1:4]; %days to analyze
 groupnames = {'first4' 'last_4' 'cntrol'}; %these names must be the same number of characters
@@ -20,8 +20,8 @@ for n = 1:length(rootdirs)
         cumhist = condition(n).allpuncta(k).cumhist;
         lifetimeplot(k,n) = plot(cumhist(1:end), 'Color', plotcolors(n,:)); ylim([0 1]); hold on;
         title(['Trajectory lifetimes over day ' mat2str(days(n,:))]);
-        fitx = 2:(size(cumhist,1));
-        fity = cumhist(2:end)'; %dont fit to single puncta (non trajectory puncta)
+        fitx = 1:(size(cumhist,1));
+        fity = cumhist(1:end)';
         condition(n).allpuncta(k).fitcoeffs = polyfit(fitx, fity, 1); %linear fit
         stats(n).slopes(k) = condition(n).allpuncta(k).fitcoeffs(1);
         clear cumhist
