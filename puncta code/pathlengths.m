@@ -1,5 +1,6 @@
 function [length] = pathlengths(allpuncta)
 
+length = [];
 j=1;
 for n = 1:size(allpuncta,2)
     for i = 1:size(allpuncta(n).puncta,2)
