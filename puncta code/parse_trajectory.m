@@ -81,7 +81,7 @@ for k = 1:roi %for each text file of maxima
         end
     end
     allpuncta_intraj = sum(sum(pun,2),1);
-    sum_total_particles = sum(total_particles(1:length(days_toanalyze)-1)); % dont get trajectories from last day - single also not counted from last day
+    sum_total_particles = sum(total_particles(days_toanalyze(1):days_toanalyze(end-1))); % dont get trajectories from last day - single also not counted from last day
     num_singles = sum_total_particles - allpuncta_intraj;
     
     ni = 1;

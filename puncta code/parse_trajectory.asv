@@ -39,6 +39,7 @@ for k = 1:roi %for each text file of maxima
     total_particles = total_particles(total_indxs+1);
     total_particles = str2double(total_particles(1:length(total_particles)/2)); % cut out text data trailing particle data
     total_days = length(total_particles); % detecting the number of days (frames)
+    if total_days =/ length(
     if isempty(intersect(days_toanalyze, 1:total_days)) % must assume first day is always day 1
         continue % skip to next .txt file
     end
@@ -81,7 +82,7 @@ for k = 1:roi %for each text file of maxima
         end
     end
     allpuncta_intraj = sum(sum(pun,2),1);
-    sum_total_particles = sum(total_particles(1:length(days_toanalyze)-1)); % dont get trajectories from last day - single also not counted from last day
+    sum_total_particles = sum(total_particles(days_toanalyze(1):days_toanalyze(end-1))); % dont get trajectories from last day - single also not counted from last day
     num_singles = sum_total_particles - allpuncta_intraj;
     
     ni = 1;
