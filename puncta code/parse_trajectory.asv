@@ -117,8 +117,8 @@ for k = 1:roi %for each text file of maxima
     ltime_cumhist = cat(2, ltime_cumhist, ones(1, all_singles)); %add non-trajectory single particles to cumulative histogram
     cumhist = ecdf(ltime_cumhist, 'function', 'survivor', 'censoring', censor_vec);
     
+    persist = zeros(
     for d = 1:length(days_toanalyze)
-        persist = zeros(length(puncta),1);
         if d == 1
             percent_persistant(d) = total_particles(1)/total_particles(1);
         else
@@ -128,7 +128,7 @@ for k = 1:roi %for each text file of maxima
                     persist(n) = 1;
                 end
             end            
-            percent_persistant(d) = sum(persist)/total_particles(1);
+            percent_persistant(d) = sum(persist)/total_particles(1)
         end        
     end
     
@@ -140,7 +140,7 @@ for k = 1:roi %for each text file of maxima
     allpuncta(k).puncta_matrix = pun;
     allpuncta(k).numsingles = all_singles;
     allpuncta(k).propsingle = all_singles/length(puncta);
-    allpuncta(k).percent_persistant = percent_persistant;
+    %allpuncta(k).percent_persistant 
     
     roi_valid(k) = k;
     roi_valid(roi_valid==0) = [];

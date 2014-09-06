@@ -17,11 +17,12 @@ for n = 1:length(rootdirs)
     for k = roi
         all_lifetimes = cat(2, all_lifetimes, condition(n).allpuncta(k).lifetimes);
         all_cumhist{k,n} = condition(n).allpuncta(k).cumhist;
+        pp{k,n} = condition(n).allpuncta(k).percent_persistant;
         cumhist = condition(n).allpuncta(k).cumhist;
         lifetimeplot(k,n) = plot(cumhist(1:end), 'Color', plotcolors(n,:)); ylim([0 1]); hold on;
         title(['Trajectory lifetimes over day ' mat2str(days(n,:))]);
-        fitx = 1:(size(cumhist,1));
-        fity = cumhist(1:end)';
+        fitx = 2:(size(cumhist,1));
+        fity = cumhist(2:end)';
         condition(n).allpuncta(k).fitcoeffs = polyfit(fitx, fity, 1); %linear fit
         stats(n).slopes(k) = condition(n).allpuncta(k).fitcoeffs(1);
         clear cumhist
@@ -37,7 +38,7 @@ end
 for i = 2:size(days,2) %we will ignore the first day of a trajectory which is always observed   
     for n = 1:length(rootdirs)    
         onegroup_cumhist = {};
-        for k = 1:size(all_cumhist, 1) % for each roi
+        for k = 1:size(all_cumhist,1) 
             cumhist = all_cumhist{k,n};
             %for c = 2:length(cumhist) %not all cumhistograms ahve hte same number of values - i.e. conditions may make just be one or two observations
             if length(all_cumhist{k,n}) >=i
@@ -46,6 +47,22 @@ for i = 2:size(days,2) %we will ignore the first day of a trajectory which is al
             end
         end
         allgroup_cumhist{n,i} = onegroup_cumhist; clear onegroup_cumhist;
+    end    
+end
+
+% do the same for percent persistant puncta
+for i = 2:size(days,2) %we will ignore the first day of a trajectory which is always observed   
+    for n = 1:length(rootdirs)    
+        onegroup_pp = {};
+        for k = 1:size(pp,1)          
+            pp_re = pp{k,n};
+            %for c = 2:length(cumhist) %not all cumhistograms ahve hte same number of values - i.e. conditions may make just be one or two observations
+            if length(pp{k,n}) >=i
+                onegroup_pp = cat(1, onegroup_pp, pp_re(i));
+            else continue
+            end
+        end
+        persistant_puncta{n,i} = onegroup_pp; clear onegroup_pp;
     end    
 end
 
@@ -60,20 +77,20 @@ for n = 1:length(rootdirs)
 end
 
 %plot box plots of all cumulative lifetime values
-for i = 2:size(days,2)
-    for n = 1:length(rootdirs)    
-        if n == 1
-            proplife_names = repmat(groupnames{n}, length(allgroup_cumhist{n,i}), 1);
-            proplife = [(allgroup_cumhist{n,i})];
-        else
-            proplife_names = vertcat(proplife_names, repmat(groupnames{n}, length(allgroup_cumhist{n,i}), 1));
-            proplife = vertcat(proplife, [(allgroup_cumhist{n,i})]);
-        end
-    end
-    all_proplife{:,i} = proplife; clear proplife;
-    all_proplife_names{:,i} = proplife_names; clear propsingle_names;
-    %anova1(cell2mat(all_proplife{:,i}), all_proplife_names{:,i});
-end
+% for i = 2:size(days,2)
+%     for n = 1:length(rootdirs)    
+%         if n == 1
+%             proplife_names = repmat(groupnames{n}, length(allgroup_cumhist{n,i}), 1);
+%             proplife = [(allgroup_cumhist{n,i})];
+%         else
+%             proplife_names = vertcat(proplife_names, repmat(groupnames{n}, length(allgroup_cumhist{n,i}), 1));
+%             proplife = vertcat(proplife, [(allgroup_cumhist{n,i})]);
+%         end
+%     end
+%     all_proplife{:,i} = proplife; clear proplife;
+%     all_proplife_names{:,i} = proplife_names; clear propsingle_names;
+%     anova1(cell2mat(all_proplife{:,i}), all_proplife_names{:,i});
+% end
 figure;
 for n = 1:size(allgroup_cumhist, 1)  
     for i = 2:size(allgroup_cumhist, 2)
@@ -83,7 +100,18 @@ for n = 1:size(allgroup_cumhist, 1)
     errorbar(mean_proplife(n,:), sem_proplife(n,:), 'color',  plotcolors(n,:)); hold on;
     ylim([0 1]);
 end
-        
+
+%plot percentage of persistant puncta
+figure;
+for n = 1:size(persistant_puncta, 1)
+    for i = 2:size(persistant_puncta, 2)
+        mean_pp(n,i-1) = mean(cell2mat(persistant_puncta{n,i}));
+        sem_pp(n,i-1) = std(cell2mat(persistant_puncta{n,i}))/sqrt(length(persistant_puncta{n,i}));
+    end
+    errorbar(mean_pp(n,:), sem_pp(n,:), 'color',  plotcolors(n,:)); hold on;
+    ylim([0 1]);
+end
+
 %plot all proportion of singles
 for n = 1:length(rootdirs)
     if n == 1
