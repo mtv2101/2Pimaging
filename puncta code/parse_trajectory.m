@@ -50,6 +50,7 @@ for k = 1:roi %for each text file of maxima
     traj_idx = parens(1:2:end)+2; %every other "%%" marks trajectory start
     traj_idx = cat(1, 1, traj_idx);
     
+    %%%%% arrange data from text input
     for t = 1:length(traj_idx) %for all trajectories
         if t == length(traj_idx)
             framesobs = str2double(frame(traj_idx(t):end));
@@ -87,6 +88,7 @@ for k = 1:roi %for each text file of maxima
     sum_total_particles = sum(total_particles(day_index(1):day_index(end)-1)); % dont get trajectories from last day - single also not counted from last day
     num_singles = sum_total_particles - allpuncta_intraj;
     
+    %%%%% calculate empirical cumulative density function of puncta lifetimes
     extra_singles = 0;
     e=1;
     ni = 1;
@@ -117,19 +119,21 @@ for k = 1:roi %for each text file of maxima
     ltime_cumhist = cat(2, ltime_cumhist, ones(1, all_singles)); %add non-trajectory single particles to cumulative histogram
     cumhist = ecdf(ltime_cumhist, 'function', 'survivor', 'censoring', censor_vec);
     
+    %%%%% calculate percentage of puncta that persist from day 1 to day d
     for d = 1:length(days_toanalyze)
         persist = zeros(length(puncta),1);
         if d == 1
-            percent_persistant(d) = total_particles(1)/total_particles(1);
+            percent_persistant(d) = 1; %all observations start day 1
         else
             for n = 1:length(puncta)
-                len = length(intersect(puncta(n).framesobs, days_toanalyze(1:d)));
+                len = length(intersect(puncta(n).framesobs, days_toanalyze(1:d))); % find trajectories with length 1:d
                 if len == d
                     persist(n) = 1;
                 end
             end            
-            percent_persistant(d) = sum(persist)/total_particles(1);
-        end        
+            percent_persistant(d) = sum(persist)/total_particles(days_toanalyze(1));
+        end  
+        clear persist
     end
     
     allpuncta(k).puncta = puncta;
@@ -144,7 +148,7 @@ for k = 1:roi %for each text file of maxima
     
     roi_valid(k) = k;
     roi_valid(roi_valid==0) = [];
-    clear dataarray puncta cumhist lentraj ltime_cumhist frame parens traj_idx allpuncta_intraj pun censor_vec
+    clear dataarray puncta cumhist lentraj ltime_cumhist frame parens traj_idx allpuncta_intraj pun censor_vec persist
 end
 
 end
