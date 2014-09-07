@@ -118,31 +118,48 @@ for n = 1:size(persistant_puncta, 1)
     ylim([0 1]);
 end
 
+%plot all new/lost ratio
+for n = 1:length(rootdirs)
+    ratio = [condition(n).allpuncta.new]./[condition(n).allpuncta.lost];
+    if n == 1
+        nl_names = repmat(groupnames{n}, length([condition(n).allpuncta.new]), 1);
+        anova_nl = ratio';
+    else
+        %if ~isempty(anova_nl)
+        nl_names = vertcat(nl_names, repmat(groupnames{n}, length([condition(n).allpuncta.new]), 1));
+        anova_nl = vertcat(anova_nl, ratio');
+        %end
+    end
+end
+[nl_p, nl_table, nl_stats] = anova1(anova_nl, nl_names);
+%nl_multcompare = multcompare(nl_stats);
+
 %plot all proportion of singles
 for n = 1:length(rootdirs)
     if n == 1
         propsingle_names = repmat(groupnames{n}, length([condition(n).allpuncta.propsingle]), 1);
         anova_singles = [condition(n).allpuncta.propsingle]';
     else
-        if ~isempty(anova_singles)
+        %if ~isempty(anova_singles)
         propsingle_names = vertcat(propsingle_names, repmat(groupnames{n}, length([condition(n).allpuncta.propsingle]), 1));
         anova_singles = vertcat(anova_singles, [condition(n).allpuncta.propsingle]');
-        end
+        %end
     end
 end
 [singles_p, singles_table, singles_stats] = anova1(anova_singles, propsingle_names);
-singles_multcompare = multcompare(singles_stats);
+%singles_multcompare = multcompare(singles_stats);
 
+% plot the slopes of whatever survival measurement was made above (ecdf or lifetime)
 for n = 1:length(rootdirs)
     if n == 1
         slope_names = repmat(groupnames{n}, length(stats(n).slopes),1);
         anova_slopes = stats(n).slopes';
     else
-        if ~isempty(stats(n).slopes)
+        %if ~isempty(stats(n).slopes)
         slope_names = vertcat(slope_names, repmat(groupnames{n}, length(stats(n).slopes),1));
         anova_slopes = vertcat(anova_slopes, stats(n).slopes');
-        end
+        %end
     end    
 end
 [slopes_p, slopes_table, slopes_stats] = anova1(anova_slopes, slope_names);
-slopes_multcompare = multcompare(slopes_stats);
+%slopes_multcompare = multcompare(slopes_stats);

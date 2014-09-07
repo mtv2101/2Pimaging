@@ -136,6 +136,29 @@ for k = 1:roi %for each text file of maxima
         clear persist
     end
     
+    %%%%% caluclate number of new and lost trajectories in middle-observed days
+    %%%%% only count trajectories that persist for > 2 days
+    for d = 2:length(days_toanalyze) %all puncta new on first observation so ignore
+        for n = 1:length(puncta)
+            puncta(n).new(d) = 0;  
+            puncta(n).lost(d) = 0;
+            if length(puncta(n).framesobs) < 2 % ignore solo observations
+                continue
+            else
+                if isempty(setdiff(puncta(n).framesobs(1:2), [days_toanalyze(d):(days_toanalyze(d)+1)]')) % if the first two observations dont begin the first day. Their difference should be empty
+                    puncta(n).new(d) = 1;
+                end
+                if days_toanalyze(d) < days_toanalyze(end) 
+                    if puncta(n).framesobs(end) == days_toanalyze(d) % if the last trajectory observation is on day d (but not the last day)
+                        puncta(n).lost(d) = 1;
+                    end
+                end
+            end
+        end        
+    end
+    num_new = sum([puncta.new]);
+    num_lost = sum([puncta.lost]);                        
+    
     allpuncta(k).puncta = puncta;
     allpuncta(k).maximaname = maximaname;
     allpuncta(k).cumhist = cumhist;
@@ -145,6 +168,8 @@ for k = 1:roi %for each text file of maxima
     allpuncta(k).numsingles = all_singles;
     allpuncta(k).propsingle = all_singles/length(puncta);
     allpuncta(k).percent_persistant = percent_persistant;
+    allpuncta(k).new = num_new;
+    allpuncta(k).lost = num_lost;
     
     roi_valid(k) = k;
     roi_valid(roi_valid==0) = [];
