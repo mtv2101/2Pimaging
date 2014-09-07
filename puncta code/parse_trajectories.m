@@ -7,8 +7,9 @@ rootdirs = {'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\ALLTC\',...
     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\MC\',...  
     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\MCenriched\',...
     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\10min_control\'};
-days = [1:4; 5:8; 5:8; 1:4; 5:8; 5:8; 1:4]; %days to analyze
-groupnames = {'ALLTCbse' 'TCnonenr' 'TClast_4' 'ALLMCbse' 'MCnonenr' 'MClast_4' ' control'}; %these names must be the same number of characters
+days = [1:4; 5:8; 5:8; 1:4; 5:8; 5:8; 1:4]; % days to analyze, lengths must be the same
+groupnames = {'ALLTCbse' 'TCnonenr' 'TClast_4' 'ALLMCbse' 'MCnonenr' 'MClast_4' ' control'}; %these names must contain the same number of characters
+control_group = 7; % which rootdir contains the control data
 
 %% plotcolors = {'k', 'r', 'b'};
 plotcolors = [31 119 180; 255 127 14; 44 160 44; 214 39 40; 148 103 189; 140 86 75;...
@@ -149,7 +150,7 @@ end
 [singles_p, singles_table, singles_stats] = anova1(anova_singles, propsingle_names);
 %singles_multcompare = multcompare(singles_stats);
 
-% plot the slopes of whatever survival measurement was made above (ecdf or lifetime)
+% plot the slopes of whatever survival/lifetime measurement was made above (ecdf or persistance)
 for n = 1:length(rootdirs)
     if n == 1
         slope_names = repmat(groupnames{n}, length(stats(n).slopes),1);
@@ -159,7 +160,12 @@ for n = 1:length(rootdirs)
         slope_names = vertcat(slope_names, repmat(groupnames{n}, length(stats(n).slopes),1));
         anova_slopes = vertcat(anova_slopes, stats(n).slopes');
         %end
+        if n == control_group
+            base_slopes = [stats(n).slopes];
+            mean_base = mean(base_slopes);
+        end
     end    
 end
-[slopes_p, slopes_table, slopes_stats] = anova1(anova_slopes, slope_names);
+anova_slopes_norm = anova_slopes - mean_base; % subtract mean value of short-term observations from daily observations
+[slopes_p, slopes_table, slopes_stats] = anova1(anova_slopes_norm, slope_names);
 %slopes_multcompare = multcompare(slopes_stats);

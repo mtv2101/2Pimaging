@@ -4,9 +4,11 @@ function [allpuncta, roi_valid] = parse_trajectory(rootdir, days_toanalyze)
 
 %rootdir = 'C:\Users\supersub\Desktop\Data\text files\MC lateral';
 
+isize = 5; %radius of image kernal to take around each puncta
 cd(rootdir);
 FullList = dir;
 MaximaList = dir(['*.txt']);
+ImgList = dir(['*2dtseries*.tif']);
 roi = length(MaximaList); %number of rois
 
 %days_toanalyze = (1:8); % [1..8]
@@ -15,6 +17,8 @@ allpuncta = [];
 roi_valid = [];
 for k = 1:roi %for each text file of maxima
     maximaname = MaximaList(k).name;
+    imgname = ImgList(k).name;
+    image = imread(imgname,'tif');
     
     % open .txt file of maxima
     delimiter = {'\t',' '};
@@ -42,12 +46,12 @@ for k = 1:roi %for each text file of maxima
     day_index = intersect(days_toanalyze, 1:total_days);
     if isempty(day_index) % must assume first day is always day 1
         continue % skip to next .txt file
-    elseif length(day_index) == 1
+    elseif length(day_index) == 1 %if there is only one frame of the roi in your day range skip it
         continue        
     end
     
     parens = strmatch('%%', frame);
-    traj_idx = parens(1:2:end)+2; %every other "%%" marks trajectory start
+    traj_idx = parens(1:2:end)+2; % in the .txt file every other "%%" marks trajectory start
     traj_idx = cat(1, 1, traj_idx);
     
     %%%%% arrange data from text input
@@ -86,7 +90,23 @@ for k = 1:roi %for each text file of maxima
     end
     allpuncta_intraj = sum(sum(pun,2),1);
     sum_total_particles = sum(total_particles(day_index(1):day_index(end)-1)); % dont get trajectories from last day - single also not counted from last day
-    num_singles = sum_total_particles - allpuncta_intraj;
+    num_singles = sum_total_particles - allpuncta_intraj;    
+        
+    % find average image around each puncta
+    for n = 1:length(puncta)
+        img = zeros(11);
+        for m = 1:length(puncta(n).framesobs) %for lifetime of trajectory
+            xrange = ceil([(puncta(n).x(m)-isize):(puncta(n).x(m)+isize)]);
+            yrange = ceil([(puncta(n).y(m)-isize):(puncta(n).y(m)+isize)]);
+            if min(xrange) <= 0 || min(yrange) <= 0 || ...
+                    max(xrange)+isize > size(image,1) || ...
+                    max(yrange)+isize > size(image,2)
+                allpuncta(k).allimg(n).img(:,:,m) = NaN((isize*2)+1); % fill image with NaNs if it crosses FOV border
+                continue
+            end
+            allpuncta(k).allimg(n).img(:,:,m) = image(xrange,yrange);
+        end
+    end
     
     %%%%% calculate empirical cumulative density function of puncta lifetimes
     extra_singles = 0;
@@ -161,6 +181,7 @@ for k = 1:roi %for each text file of maxima
     
     allpuncta(k).puncta = puncta;
     allpuncta(k).maximaname = maximaname;
+    allpuncta(k).imgname = imgname;
     allpuncta(k).cumhist = cumhist;
     allpuncta(k).lifetimes = ltime_cumhist;
     allpuncta(k).censor_vec = censor_vec;
