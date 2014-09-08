@@ -16,7 +16,7 @@ beh4 = beh_types{4}; %'MISS';
 ALLROI = 0; % if =1 plot all traces in all rois
 % OdorON = 120; % frame odor was delivered
 triallen = 300;
-sig_win = 20; % test for significant changes in windows of this size
+sig_win = 15; % test for significant changes in windows of this size
 post_x = 10; % multiply sig_win by this to get number of post-baseline frames
 pre_x = 5;
 alpha = .01;
@@ -117,7 +117,7 @@ for b = BLOCKS
             it2=it2+1;
         elseif b3(trial) && o1(trial)
             o1b3_all(it3,:,:) = alldff(btrial,:,:);
-            allblocks_parsed.o1b3 = cat(1, allallblocks_parsed.o1b3block_o1b3, o1b3_all(it3,:,:));
+            allblocks_parsed.o1b3 = cat(1, allblocks_parsed.o1b3, o1b3_all(it3,:,:));
             it3=it3+1;
         elseif b4(trial) && o1(trial)
             o1b4_all(it4,:,:) = alldff(btrial,:,:);

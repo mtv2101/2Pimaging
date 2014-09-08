@@ -21,7 +21,7 @@
 clear all
 
 %%%%% DEFINE VARS
-blocksize = 20; %break up data processing into groups of trials this long
+blocksize = 13; %break up data processing into groups of trials this long
 xpix = 512;
 ypix = 512;
 downresfactor = 2; % for registration use this fraction of the total image
@@ -29,7 +29,7 @@ xcorrthresh = 0.35; % reject images that correlate worse than this value
 %maxstep = .002; % maximum step length for the registration optimizer
 
 %%%%% BATCH LOAD TIF STACKS AND DO XYZ REGISTRATIONS WITH CH1
-rootdir = 'C:\Kurt\2014-06-05\Plus-lim vs min-lim'; % full path to root directory of your tiff stacks
+rootdir = 'D:\2014-08-27\3d tiffs'; % full path to root directory of your tiff stacks
 cd(rootdir);
 FullList = dir;
 ImgExtension = '.tif'; % specify image extension

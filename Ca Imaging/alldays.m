@@ -1,15 +1,17 @@
 clear all
 
 numdays = 2;
-cd('G:\Kurt\Training in Metch olfactometer study\031114-05\Easy task2 comparison');
+cd('D:\040714-01\Comparisons\Odor exposure versus 2014-06-10');
 ALLROI = 0; % if = 1 plot all data in huge graphs
 
-odor1 = 'ETHYLTIG';
-odor2 = 'HEXANONE';
-%odor1 = 'CINEOLE';
-%odor2 = 'VALEDHYD';
-%odor1 = '6EB 4AA';
-%odor2 = '4EB 6AA';
+odor1 = 'ETHYLTIGLATE';
+odor2 = 'ISOAMYLACETATE';
+%odor1 = 'HEXANONE';
+%odor2 = 'ETHYL TIG';
+%odor1 = 'VALEDHYD';
+%odor2 = 'CINEOLE';
+%odor1 = '4EB 6AA';
+%odor2 = '6EB 4AA';
 beh_types = {'HIT', 'CR', 'FA', 'MISS'};
 
 % load "ALLBLOCKS'

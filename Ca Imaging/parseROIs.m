@@ -3,6 +3,9 @@
 %waves from each roi done in FIJI must be saves with filename
 %containing "wave_block" so that it loads correctly
 
+%2014-07-07 Kurt modified line 25 to allow loading wave .txt tab delimited files
+%instead of needing to first convert to a .mat file.
+
 % This code does 4 things:
 % 1. It reformats the data from [frames, rois] to [trials, frames, rois]
 % 2. Df/f is then calculated using baseline data from all trials in each block
@@ -12,7 +15,7 @@
 
 clear all
 
-rootdir = 'G:\Kurt\Training in Metch olfactometer study\031114-05\GC extracted data for all trials\2014-04-25\Odors1';
+rootdir = 'D:\Metch olfactometer study\031114-07\2014-05-13';
 cd(rootdir);
 load 'ALLBLOCKS.mat'
 Filenames = dir(['*wave_block*']);
@@ -20,7 +23,8 @@ base_win = [20:100]; %frames that define baseline for df/f
 trial_reject = .5; %reject trials with more than this fraction of discarded frames
 
 for x = 1:length(ALLBLOCKS) %for each block
-    d = struct2cell(load(Filenames(x).name));
+%    d = struct2cell(load(Filenames(x).name)); For loading .mat format 
+     d = {dlmread(Filenames(x).name, '\t', 1, 1)};
     alldat = d{1};
     for r = 1:size(alldat,2) %for each roi
         indx=1;
@@ -60,8 +64,8 @@ for x = 1:length(ALLBLOCKS) %for each block
         dims = size(dat);
         ft = dat(:,:,r); %timeseries mean of ROI
         f0 = nanmean(nanmean(ft(:,base_win), 2)); %mean of baseline window within each block
-        d = (ft(:)-f0)./f0; %df/f
-        alldff(:,:,r) = reshape(d,dims(1),dims(2));
+        df = (ft(:)-f0)./f0; %df/f
+        alldff(:,:,r) = reshape(df,dims(1),dims(2));
     end
 
 

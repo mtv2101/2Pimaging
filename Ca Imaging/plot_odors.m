@@ -4,6 +4,8 @@ function plot_odors(day, ALLDAYS, rootdir, odor1, odor2)
 % http://www.mathworks.com/matlabcentral/fileexchange/26311-shadederrorbar
 
 ALLROI = 0;
+OdorOnTime = 103; %Frame that odor valve opens
+OdorOffTime = 133; %Frame that odor valve closes
 
 %%%%%%%%% get data
 
@@ -140,7 +142,10 @@ shadedErrorBar([],nanmean(o2mean,1), o2error,  {'color', [.5, .5, 1]}, 1);hold o
 axis tight;
 xLimits = get(sub9,'XLim');
 yLimits = get(sub9,'YLim');
-h = patch([120; 120; 150; 150], [yLimits(1); yLimits(2); yLimits(2); yLimits(1);], [.7 .7 .7]);
+%h = patch([120; 120; 150; 150], [yLimits(1); yLimits(2); yLimits(2);
+%yLimits(1);], [.7 .7 .7]); Kurt added a variable OdorOnTime and
+%OdorOffTime to allow for different odor presentations
+h = patch([OdorOnTime; OdorOnTime; OdorOffTime; OdorOffTime], [yLimits(1); yLimits(2); yLimits(2); yLimits(1);], [.7 .7 .7]);
 set(h, 'FaceAlpha', .4, 'EdgeColor', 'none');
 hlegend = legend(mat2str(odor1), mat2str(odor2));
 hkids = get(hlegend,'Children');    %# Get the legend children
