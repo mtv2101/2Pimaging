@@ -106,23 +106,23 @@ for k = 1:roi %for each text file of maxima
     num_singles = sum_total_particles - allpuncta_intraj;  
     
     % define solo puncta coordiantes and trajectory puncta coordinates  
-    for n = 1:length(days_toanalyze)
-        % put trajectory x puncta into a vector
-        for t = 1:length(trajectory) %for all trajectories
-            if length(trajectory(t).x) >= n
-                xtrajs(t) = trajectory(t).x(n);
-            else
-                xtrajs(t) = NaN;             
-            end
-        end
-        all_coords_tocompare = str2double(all_coords{1,n});     
-        for m = 1:length(all_coords_tocompare)
-            issolo(m,n) =  ~ismember(all_coords_tocompare(m), xtrajs); % now find which elements from the all_coordinates are in a trajectory
-        end
-        clear all_coords_tocompare xtrajs
-    end        
+%     for n = 1:length(days_toanalyze)
+%         % put trajectory x puncta into a vector
+%         for t = 1:length(trajectory) %for all trajectories
+%             if length(trajectory(t).x) >= n
+%                 xtrajs(t) = trajectory(t).x(n);
+%             else
+%                 xtrajs(t) = NaN;             
+%             end
+%         end
+%         all_coords_tocompare = str2double(all_coords{1,n});     
+%         for m = 1:length(all_coords_tocompare)
+%             issolo(m,n) =  ~ismember(all_coords_tocompare(m), xtrajs); % now find which elements from the all_coordinates are in a trajectory
+%         end
+%         clear all_coords_tocompare xtrajs
+%     end        
         
-    % find average image around each puncta
+    % find average image around each trajectory puncta
     for n = 1:length(trajectory)
         img = zeros(11);
         for m = 1:length(trajectory(n).fr_intsect) %for lifetime of trajectory
@@ -204,10 +204,18 @@ for k = 1:roi %for each text file of maxima
                     end
                 end
             end
+            %all_new(n,d) = trajectory(n).new(d);
+            %all_lost(n,d) = trajectory(n).lost(d);
         end        
     end
-    num_new = sum([trajectory.new]);
-    num_lost = sum([trajectory.lost]);                        
+    for d = 2:length(days_toanalyze)
+        for n = 1:length(trajectory)
+            all_new(n) = trajectory(n).new(d);
+            all_lost(n) = trajectory(n).lost(d);
+        end
+        sum_all_new(d) = sum(all_new);
+        sum_all_lost(d) = sum(all_lost);
+    end                      
     
     allpuncta(k).trajectory = trajectory;
     allpuncta(k).maximaname = maximaname;
@@ -219,14 +227,14 @@ for k = 1:roi %for each text file of maxima
     allpuncta(k).numsingles = all_singles;
     allpuncta(k).propsingle = all_singles/length(trajectory);
     allpuncta(k).percent_persistant = percent_persistant;
-    allpuncta(k).new = num_new;
-    allpuncta(k).lost = num_lost;
+    allpuncta(k).new = sum_all_new;
+    allpuncta(k).lost = sum_all_lost;
     allpuncta(k).allcoords = all_coords;
-    allpuncta(k).issolo = issolo;
+    %allpuncta(k).issolo = issolo;
     
     roi_valid(k) = k;
     roi_valid(roi_valid==0) = [];
-    clear dataarray trajectory cumhist lentraj ltime_cumhist frame parens traj_idx allpuncta_intraj censor_vec persist pun
+    clear dataarray trajectory cumhist lentraj ltime_cumhist frame parens traj_idx allpuncta_intraj censor_vec persist pun issolo
 end
 
 end
