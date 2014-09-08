@@ -226,7 +226,7 @@ for k = 1:roi %for each text file of maxima
     
     roi_valid(k) = k;
     roi_valid(roi_valid==0) = [];
-    clear dataarray trajectory cumhist lentraj ltime_cumhist frame parens traj_idx allpuncta_intraj censor_vec persist pun
+    clear dataarray puncta cumhist lentraj ltime_cumhist frame parens traj_idx allpuncta_intraj censor_vec persist pun
 end
 
 end
