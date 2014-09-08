@@ -1,8 +1,8 @@
 clear all;
 
 norm_dir = 'C:\Users\supersub\Desktop\Data\aggregate_all\norm templates\';
-in_dir = 'C:\Users\supersub\Desktop\Data\aggregate_all';
-out_dir = 'C:\Users\supersub\Desktop\Data\aggregate_all\normalized\';
+in_dir = 'C:\Users\supersub\Desktop\Data\aggregate_all\temp\';
+out_dir = 'C:\Users\supersub\Desktop\Data\aggregate_all\temp_out\';
 
 cd(norm_dir);
 norm_list = dir;

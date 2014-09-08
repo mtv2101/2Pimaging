@@ -1,6 +1,6 @@
-masterlist = "C:\\Users\\supersub\\Desktop\\Data\\filelist_MASTER.txt";
-inputfolder = "C:\\Users\\supersub\\Desktop\\Data\\aggregate_all\\normalized\\";
-groupfolders =  "C:\\Users\\supersub\\Desktop\\Data\\text files\\1cutoff 12disp\\";
+masterlist = "C:\\Users\\supersub\\Desktop\\Data\\filelist_MASTER_test.txt";
+inputfolder = "C:\\Users\\supersub\\Desktop\\Data\\aggregate_all\\temp_out\\";
+groupfolders =  "C:\\Users\\supersub\\Desktop\\Data\\text files\\1cutoff 8disp\\";
 
 allfiles = getFileList(inputfolder);
 filestring=File.openAsString(masterlist); 
@@ -25,7 +25,7 @@ if (!File.exists(group_folder))
       File.makeDirectory(group_folder);
 
 run("Images to Stack");
-//saveAs("tif", output + dendrite_id + " 2dtseries_norm");
+saveAs("tif", output + dendrite_id + " 2dtseries_norm");
 saveAs("tif", group_folder + dendrite_id + " 2dtseries_norm");
 close();
 }

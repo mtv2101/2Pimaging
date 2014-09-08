@@ -24,8 +24,6 @@ listout = getFileList(output[i]);
 
 tempdir = output[i]+ "batch output" + File.separator + File.separator;
 File.makeDirectory(tempdir);
-if (!File.exists(tempdir))
-      exit("Unable to create directory");
 
 zcut_string = "first=" + cut_top[i] + " last=" + cut_bottom[i] + " increment=1";
 for (n = 0; n < listin.length; n++)

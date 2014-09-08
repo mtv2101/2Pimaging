@@ -2,16 +2,16 @@ clear all;
 
 warning('off','all');
 
-rootdirs = {'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\ALLTC\',...
-    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\TC\',...    
-    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\TCenriched\',...
-    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\ALLMC\',...
-    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\MC\',...  
-    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\MCenriched\',...
-    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\10min_control\'};
-days = [1:4; 5:8; 5:8; 1:4; 5:8; 5:8; 1:4]; % days to analyze, lengths must be the same
-groupnames = {'ALLTCbse' 'TCnonenr' 'TClast_4' 'ALLMCbse' 'MCnonenr' 'MClast_4' ' control'}; %these names must contain the same number of characters
-control_group = 7; % which rootdir contains the control data
+rootdirs = {'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\all_latden\',...
+    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\10min_control\'};%,...    
+    %'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\TCenriched\',...
+    %'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\ALLMC\',...
+    %'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\MC\',...  
+    %'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\MCenriched\',...
+    %'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\10min_control\'};
+days = [1:8; 1:8]; % days to analyze, lengths must be the same
+groupnames = {'all_latden' ' control  '}; %these names must contain the same number of characters
+control_group = 2; % which rootdir contains the control data
 
 %% plotcolors = {'k', 'r', 'b'};
 plotcolors = [31 119 180; 255 127 14; 44 160 44; 214 39 40; 148 103 189; 140 86 75;...
@@ -123,16 +123,23 @@ end
 
 %plot all new/lost ratio
 for n = 1:length(rootdirs)
-    ratio = [condition(n).allpuncta.new]./[condition(n).allpuncta.lost];
-    if n == 1
-        nl_names = repmat(groupnames{n}, length([condition(n).allpuncta.new]), 1);
-        anova_nl = ratio';
-    else
-        %if ~isempty(anova_nl)
-        nl_names = vertcat(nl_names, repmat(groupnames{n}, length([condition(n).allpuncta.new]), 1));
-        anova_nl = vertcat(anova_nl, ratio');
-        %end
-    end
+    r = 1;
+        for x = 1:length(condition(n).allpuncta)
+            if ~isempty(condition(n).allpuncta(x).new)
+                ratio(r) = sum([condition(n).allpuncta(x).new]/[condition(n).allpuncta(x).lost],2); % get average ratio in day range
+                r = r+1;
+            end
+        end
+        if n == 1
+            nl_names = repmat(groupnames{n}, length(ratio), 1);
+            anova_nl = ratio';
+        else
+            %if ~isempty(anova_nl)
+            nl_names = vertcat(nl_names, repmat(groupnames{n}, length(ratio), 1));
+            anova_nl = vertcat(anova_nl, ratio');
+            %end
+        end
+    clear ratio r
 end
 [nl_p, nl_table, nl_stats] = anova1(anova_nl, nl_names);
 %nl_multcompare = multcompare(nl_stats);

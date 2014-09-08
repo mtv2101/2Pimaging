@@ -1,5 +1,5 @@
-masterlist = "C:\\Users\\supersub\\Desktop\\Data\\filelist_MASTER.txt";
-groupfolders =  "C:\\Users\\supersub\\Desktop\\Data\\text files\\1cutoff 12disp\\";
+masterlist = "C:\\Users\\supersub\\Desktop\\Data\\filelist_MASTER_test.txt";
+groupfolders =  "C:\\Users\\supersub\\Desktop\\Data\\text files\\1cutoff 8disp\\";
 
 filestring=File.openAsString(masterlist); 
 rows=split(filestring, "\n"); 

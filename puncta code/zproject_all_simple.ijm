@@ -1,5 +1,5 @@
-input = "C:\\Users\\supersub\\Desktop\\Data\\2.1\\warped\\";
-output = "C:\\Users\\supersub\\Desktop\\Data\\2.1\\rois\\9\\";
+input = "C:\\Users\\supersub\\Desktop\\Data\\2.8\\warped\\";
+output = "C:\\Users\\supersub\\Desktop\\Data\\2.8\\rois\\10\\";
 
 setBatchMode(true); 
 list1 = getFileList(input);
@@ -26,7 +26,7 @@ function action1(input, output, filename) {
         open(input + filename);
         roiManager("Select", 0);
         run("Crop");
-        run("Slice Keeper", "first=106 last=126 increment=1");
+        run("Slice Keeper", "first=59 last=79 increment=1");
         run("Z Project...", "projection=[Max Intensity]");
         saveAs("tif", output + filename);
         close();

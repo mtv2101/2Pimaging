@@ -55,7 +55,7 @@ for k = 1:roi %for each text file of maxima
     z_all = dataarray{:,5}; 
     
     % get indexes of all pucnta detections
-    for n = 1:length(days_toanalyze)
+    for n = 1:day_index
         allcords_indx(n) = total_indxs(days_toanalyze(n))+4+total_particles(n); % coordinates start 4 after "Frame"
         all_coords{1,n} = x_all(allcords_indx(n):(allcords_indx(n)+total_particles(days_toanalyze(n)))-1);
         all_coords{2,n} = y_all(allcords_indx(n):(allcords_indx(n)+total_particles(days_toanalyze(n)))-1);
