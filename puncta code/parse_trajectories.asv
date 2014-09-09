@@ -8,12 +8,12 @@ rootdirs = {'C:\Users\supersub\Desktop\Data\text files\1cutoff 4disp\all_latden\
     'C:\Users\supersub\Desktop\Data\text files\1cutoff 10disp\all_latden\',...
     'C:\Users\supersub\Desktop\Data\text files\1cutoff 12disp\all_latden\'};
 days = [1:4; 1:4; 1:4; 1:4; 1:4]; % days to analyze, lengths must be the same
-groupnames = {'link4 ' 'link6 ' 'link8 ' 'link10' 'link12'}; %these names must contain the same number of characters
+groupnames = {'0.1%' '0.3%' '0.5%' '0.7%' '1.0%' '2.0%' '5.0%'}; %these names must contain the same number of characters
 control_group = 3; % which rootdir contains the control data
 
 %% plotcolors = {'k', 'r', 'b'};
-plotcolors = [31 119 180; 255 127 14; 44 160 44; 214 39 40; 148 103 189; 140 86 75;...
-    227 119 194]./255;%; 127 127 127; 188 189 34; 23 190 207]./255); % Tableau 10 Palette, reverse order
+plotcolors = flip([31 119 180; 255 127 14; 44 160 44; 214 39 40; 148 103 189; 140 86 75;...
+    227 119 194]./255);%; 127 127 127; 188 189 34; 23 190 207]./255); % Tableau 10 Palette, reverse order
 
 figure
 for n = 1:length(rootdirs)

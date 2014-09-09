@@ -31,9 +31,9 @@ for k = 1:roi %for each text file of maxima
     start_traj = s(1);
     frame = frame((start_traj+13):end);
     
-    total_indxs = strmatch('Frame ', dataarray{1,2});
+    total_indxs = strmatch('Frame ', dataarray{1,2})+1; % add one to move past a missing "%%" in txt format
     total_particles = dataarray{1,2};
-    total_particles = total_particles(total_indxs+1); % first use of "frame" does not accompagny data
+    total_particles = total_particles(total_indxs); % first use of "frame" does not accompagny data
     total_particles = str2double(total_particles(1:length(total_particles)/2)); % cut out text data trailing particle data
     total_days = length(total_particles); % detecting the number of days (frames)
     day_index = intersect(days_toanalyze, 1:total_days);
@@ -55,11 +55,11 @@ for k = 1:roi %for each text file of maxima
     z_all = dataarray{:,5}; 
     
     % get indexes of all pucnta detections
-    for n = day_index
-        allcords_indx(n) = total_indxs(days_toanalyze(n))+4+total_particles(n); % coordinates start 4 after "Frame"
-        all_coords{1,n} = x_all(allcords_indx(n):(allcords_indx(n)+total_particles(days_toanalyze(n)))-1);
-        all_coords{2,n} = y_all(allcords_indx(n):(allcords_indx(n)+total_particles(days_toanalyze(n)))-1);
-        all_coords{3,n} = z_all(allcords_indx(n):(allcords_indx(n)+total_particles(days_toanalyze(n)))-1);
+    for n = 1:length(day_index)
+        allcords_indx(n) = total_indxs(day_index(n))+3+total_particles(day_index(n)); % coordinates start 4 after "Frame" and 1 after first coordiante list
+        all_coords{1,n} = x_all(allcords_indx(n):(allcords_indx(n)+total_particles(day_index(n)))-1);
+        all_coords{2,n} = y_all(allcords_indx(n):(allcords_indx(n)+total_particles(day_index(n)))-1);
+        all_coords{3,n} = z_all(allcords_indx(n):(allcords_indx(n)+total_particles(day_index(n)))-1);
     end
     
     % get indexes of trajectories
@@ -95,33 +95,37 @@ for k = 1:roi %for each text file of maxima
         end
     end
     
-    allpuncta_intraj = [];
-    for d = 1:length(day_index)-1 %dont iterate to last day which is all single
-        for n = 1:length(trajectory)
-            pun(d,n) = length(find(trajectory(n).framesobs == days_toanalyze(day_index(d)))); % get each roi with a puncta detected that day            
-        end
-    end
-    allpuncta_intraj = sum(sum(pun,2),1);    
-    sum_total_particles = sum(total_particles(day_index(1):day_index(end)-1)); % dont get trajectories from last day - single also not counted from last day
-    num_singles = sum_total_particles - allpuncta_intraj;  
+%     allpuncta_intraj = [];
+%     for d = 1:length(day_index)-1 %dont iterate to last day which is all single
+%         for n = 1:length(trajectory)
+%             pun(d,n) = length(find(trajectory(n).framesobs == day_index(d))); % get each roi with a puncta detected that day            
+%         end
+%     end
+%     allpuncta_intraj = sum(sum(pun,2),1);        
+    %num_singles = sum_total_particles - allpuncta_intraj; 
+    
     
     % define solo puncta coordiantes and trajectory puncta coordinates  
-%     for n = 1:length(days_toanalyze)
-%         % put trajectory x puncta into a vector
-%         for t = 1:length(trajectory) %for all trajectories
-%             if length(trajectory(t).x) >= n
-%                 xtrajs(t) = trajectory(t).x(n);
-%             else
-%                 xtrajs(t) = NaN;             
-%             end
-%         end
-%         all_coords_tocompare = str2double(all_coords{1,n});     
-%         for m = 1:length(all_coords_tocompare)
-%             issolo(m,n) =  ~ismember(all_coords_tocompare(m), xtrajs); % now find which elements from the all_coordinates are in a trajectory
-%         end
-%         clear all_coords_tocompare xtrajs
-%     end        
-        
+    for n = 1:length(day_index)-1 %dont count solo puncta on last day as single
+        % put trajectory "x" puncta into a vector
+        for t = 1:length(trajectory) %for all trajectories
+            if length(trajectory(t).x) >= n
+                xtrajs(t) = trajectory(t).x(n);
+            else
+                xtrajs(t) = NaN;             
+            end
+        end
+        all_coords_tocompare = str2double(all_coords{1,n});     
+        for m = 1:length(all_coords_tocompare)
+            issolo(m,n) = ~ismember(all_coords_tocompare(m), xtrajs); % now find which elements from the all_coordinates are in a trajectory
+        end
+        clear all_coords_tocompare xtrajs
+    end        
+    
+    sum_nonend_particles = sum(total_particles(day_index(1):day_index(end)-1)); % dont get trajectories from last day - single also not counted from last day
+    sum_total_particles = sum(total_particles(day_index(1):day_index(end)));
+    num_singles = sum(sum(issolo));
+    
     % find average image around each trajectory puncta
     for n = 1:length(trajectory)
         img = zeros(11);
@@ -139,49 +143,50 @@ for k = 1:roi %for each text file of maxima
     end
     
     %%%%% calculate empirical cumulative density function of puncta lifetimes
-    extra_singles = 0;
-    e=1;
-    ni = 1;
-    censor_vec = [];
-    for n = 1:length(trajectory) %length puncta may be shorter than traj_indx because some puncta lie outside day range
-        if isempty(trajectory(n).framesobs)
-            continue
-        elseif trajectory(n).allframesobs(end) == days_toanalyze(day_index(1)) % if the trajectory ends on the first day of obseravation don't count it as a trajectory even if it was observed earlier.  
-            extra_singles = e;
-            e=e+1;
-            continue
-        elseif trajectory(n).allframesobs(1) == days_toanalyze(day_index(end)) % the converse must be taken care of as well.  These will be treated as single obseravations
-            extra_singles = e;
-            e=e+1;
-            continue
-        else
-            ltime_cumhist(ni) = length(trajectory(n).framesobs); % get lifetimes, over 4 observations max lifetime is 3 days
-            if trajectory(n).framesobs(end) == days_toanalyze(day_index(end))
-                censor_vec(ni) = 1; % note whenever the trajectory hits the "wall" (is right censored)
-            else
-                censor_vec(ni) = 0;
-            end
-            ni=ni+1;
-        end
-    end
-    all_singles = num_singles+extra_singles; %add on vector observations with just one day of observation within the day range
-    censor_vec = logical(cat(2, censor_vec, zeros(1, all_singles)));    
-    ltime_cumhist = cat(2, ltime_cumhist, ones(1, all_singles)); %add non-trajectory single particles to cumulative histogram
-    cumhist = ecdf(ltime_cumhist, 'function', 'survivor', 'censoring', censor_vec);
+%     extra_singles = 0;
+%     e=1;
+%     ni = 1;
+%     censor_vec = [];
+%     for n = 1:length(trajectory) %length puncta may be shorter than traj_indx because some puncta lie outside day range
+%         if isempty(trajectory(n).framesobs)
+%             continue
+%         elseif trajectory(n).allframesobs(end) == day_index(1) % if the trajectory ends on the first day of obseravation don't count it as a trajectory even if it was observed earlier.  
+%             extra_singles = e;
+%             e=e+1;
+%             continue
+%         elseif trajectory(n).allframesobs(1) == day_index(end) % the converse must be taken care of as well.  These will be treated as single obseravations
+%             extra_singles = e;
+%             e=e+1;
+%             continue
+%         else
+%             ltime_cumhist(ni) = length(trajectory(n).framesobs); % get lifetimes, over 4 observations max lifetime is 3 days
+%             if trajectory(n).framesobs(end) == day_index(end)
+%                 censor_vec(ni) = 1; % note whenever the trajectory hits the "wall" (is right censored)
+%             else
+%                 censor_vec(ni) = 0;
+%             end
+%             ni=ni+1;
+%         end
+%     end
+    %all_singles = num_singles+extra_singles; %add on vector observations with just one day of observation within the day range
+    %all_singles = num_singles;
+    %censor_vec = logical(cat(2, censor_vec, zeros(1, all_singles)));    
+    %ltime_cumhist = cat(2, ltime_cumhist, ones(1, all_singles)); %add non-trajectory single particles to cumulative histogram
+    %cumhist = ecdf(ltime_cumhist, 'function', 'survivor', 'censoring', censor_vec);
     
     %%%%% calculate percentage of puncta that persist from day 1 to day d
-    for d = day_index
+    for d = 1:length(day_index)
         persist = zeros(length(trajectory),1);
         if d == 1
             percent_persistant(d) = 1; %all observations start day 1
         else
             for n = 1:length(trajectory)
-                len = length(intersect(trajectory(n).framesobs, days_toanalyze(day_index(1:d)))); % find trajectories with length 1:d
+                len = length(intersect(trajectory(n).framesobs, day_index(1:d))); % find trajectories with length 1:d
                 if len == d
                     persist(n) = 1;
                 end
             end            
-            percent_persistant(d) = sum(persist)/total_particles(days_toanalyze(day_index(1)));
+            percent_persistant(d) = sum(persist)/total_particles(day_index(1));
         end  
         clear persist
     end
@@ -195,11 +200,11 @@ for k = 1:roi %for each text file of maxima
             if length(trajectory(n).framesobs) < 2 % ignore solo observations
                 continue
             else
-                if isempty(setdiff(trajectory(n).framesobs(1:2), [days_toanalyze(day_index(d)):(days_toanalyze(day_index(d)))+1]')) % if the first two observations dont begin the first day. Their difference should be empty
+                if isempty(setdiff(trajectory(n).framesobs(1:2), [day_index(d):(day_index(d))+1]')) % if the first two observations dont begin the first day. Their difference should be empty
                     trajectory(n).new(d) = 1;
                 end
-                if days_toanalyze(day_index(d)) < days_toanalyze(day_index(end))
-                    if trajectory(n).framesobs(end) == days_toanalyze(day_index(d)) % if the last trajectory observation is on day d (but not the last day)
+                if day_index(d) < day_index(end)
+                    if trajectory(n).framesobs(end) == day_index(d) % if the last trajectory observation is on day d (but not the last day)
                         trajectory(n).lost(d) = 1;
                     end
                 end
@@ -220,17 +225,18 @@ for k = 1:roi %for each text file of maxima
     allpuncta(k).trajectory = trajectory;
     allpuncta(k).maximaname = maximaname;
     allpuncta(k).imgname = imgname;
-    allpuncta(k).cumhist = cumhist;
-    allpuncta(k).lifetimes = ltime_cumhist;
-    allpuncta(k).censor_vec = censor_vec;
-    allpuncta(k).puncta_matrix = pun;
-    allpuncta(k).numsingles = all_singles;
-    allpuncta(k).propsingle = all_singles/length(trajectory);
+    %allpuncta(k).cumhist = cumhist;
+    %allpuncta(k).lifetimes = ltime_cumhist;
+    %allpuncta(k).censor_vec = censor_vec;
+    %allpuncta(k).puncta_matrix = pun;
+    allpuncta(k).numsingles = num_singles;
+    allpuncta(k).trajpuncta = sum_total_particles;
+    allpuncta(k).propsingle = num_singles/sum_nonend_particles;
     allpuncta(k).percent_persistant = percent_persistant;
     allpuncta(k).new = sum_all_new;
     allpuncta(k).lost = sum_all_lost;
     allpuncta(k).allcoords = all_coords;
-    %allpuncta(k).issolo = issolo;
+    allpuncta(k).issolo = issolo;
     
     roi_valid(k) = k;
     roi_valid(roi_valid==0) = [];
