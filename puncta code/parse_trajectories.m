@@ -2,14 +2,18 @@ clear all;
 
 warning('off','all');
 
-rootdirs = {'C:\Users\supersub\Desktop\Data\text files\1cutoff 4disp\all_latden\',...
-    'C:\Users\supersub\Desktop\Data\text files\1cutoff 6disp\all_latden\',...    
-    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\all_latden\',...
-    'C:\Users\supersub\Desktop\Data\text files\1cutoff 10disp\all_latden\',...
-    'C:\Users\supersub\Desktop\Data\text files\1cutoff 12disp\all_latden\'};
-days = [1:4; 1:4; 1:4; 1:4; 1:4]; % days to analyze, lengths must be the same
-groupnames = {'link4 ' 'link6 ' 'link8 ' 'link10' 'link12'}; %these names must contain the same number of characters
-control_group = 3; % which rootdir contains the control data
+rootdirs = {'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\all_latden\',...
+    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\10min_control\'};%,...
+%     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\MCenriched\',...    
+%     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\TC\',...
+%     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\TCenriched\',...
+%     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\10min_control\'};%,...
+    %'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\TCenriched\',...
+    %'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\10min_control\'};
+days = [1:4; 1:4]; % days to analyze, lengths must be the same
+groupnames = {'ALLld' 'basel'}; %these names must contain the same number of characters
+%{'ALLMCbse' 'MCnonenr' 'MClast_4' 'ALLTCbse' 'TCnonenr' 'TClast_4' ' control'};
+control_group = 2; % which rootdir contains the control data
 
 %% plotcolors = {'k', 'r', 'b'};
 plotcolors = [31 119 180; 255 127 14; 44 160 44; 214 39 40; 148 103 189; 140 86 75;...
@@ -78,7 +82,7 @@ end
 figure;
 for n = 1:length(rootdirs)
     h = cdfplot(condition(n).length); hold on;
-    legend(groupnames{n}); legend boxoff;
+    %legend(groupnames{n}); legend boxoff;
     set(h,'Color',plotcolors(n,:));
     xlim([0 12]);
 end
@@ -140,7 +144,24 @@ for n = 1:length(rootdirs)
     clear ratio r
 end
 [nl_p, nl_table, nl_stats] = anova1(anova_nl, nl_names);
-%nl_multcompare = multcompare(nl_stats);
+figure; nl_multcompare = multcompare(nl_stats);
+
+%get new/lost ratio by day
+% for d = 2:size(days,2)-1
+%     it = 1;
+%     for n = 1:length(rootdirs)
+%         for x = 1:length(condition(n).allpuncta)
+%             nl_daily(it,x,n) = [condition(n).allpuncta(x).new(d)]/[condition(n).allpuncta(x).lost(d)];
+%         end
+%     end
+%     it=it+1;
+% end
+% for n = 1:length(rootdirs)
+%     mean_nl_daily = squeeze(nanmean(nl_daily,2));
+%     sem_nl_daily = squeeze(nanstd(nl_daily,2)/sqrt(size(nl_daily),2));
+%     errorbar(mean_nl_daily(:,n), sem_nl_daily(:,n), 'color',  plotcolors(n,:)); hold on;
+% end   
+%end
 
 %plot all proportion of singles
 for n = 1:length(rootdirs)

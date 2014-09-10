@@ -92,6 +92,8 @@ for k = 1:roi %for each text file of maxima
             trajectory(t).allframesobs = framesobs;
             trajectory(t).framesobs = framesobs(fr_intsect);
             trajectory(t).fr_intsect = fr_intsect;
+            trajectory(t).lifetime = length(framesobs(fr_intsect));
+            trajectory(t).firstobs = framesobs(1);
         end
     end
     
