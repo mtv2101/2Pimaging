@@ -10,7 +10,7 @@ rootdirs = {'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\all_latden\
 %     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\10min_control\'};%,...
     %'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\TCenriched\',...
     %'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\10min_control\'};
-days = [1:4; 1:4]; % days to analyze, lengths must be the same
+days = [1:8; 1:8]; % days to analyze, lengths must be the same
 groupnames = {'ALLld' 'basel'}; %these names must contain the same number of characters
 %{'ALLMCbse' 'MCnonenr' 'MClast_4' 'ALLTCbse' 'TCnonenr' 'TClast_4' ' control'};
 control_group = 2; % which rootdir contains the control data
