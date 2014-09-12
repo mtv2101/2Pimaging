@@ -95,17 +95,7 @@ for k = 1:roi %for each text file of maxima
             trajectory(t).lifetime = length(framesobs(fr_intsect));
             trajectory(t).firstobs = framesobs(1);
         end
-    end
-    
-%     allpuncta_intraj = [];
-%     for d = 1:length(day_index)-1 %dont iterate to last day which is all single
-%         for n = 1:length(trajectory)
-%             pun(d,n) = length(find(trajectory(n).framesobs == day_index(d))); % get each roi with a puncta detected that day            
-%         end
-%     end
-%     allpuncta_intraj = sum(sum(pun,2),1);        
-    %num_singles = sum_total_particles - allpuncta_intraj; 
-    
+    end    
     
     % define solo puncta coordiantes and trajectory puncta coordinates  
     for n = 1:length(day_index)-1 %dont count solo puncta on last day as single
@@ -144,38 +134,6 @@ for k = 1:roi %for each text file of maxima
         end
     end
     
-    %%%%% calculate empirical cumulative density function of puncta lifetimes
-%     extra_singles = 0;
-%     e=1;
-%     ni = 1;
-%     censor_vec = [];
-%     for n = 1:length(trajectory) %length puncta may be shorter than traj_indx because some puncta lie outside day range
-%         if isempty(trajectory(n).framesobs)
-%             continue
-%         elseif trajectory(n).allframesobs(end) == day_index(1) % if the trajectory ends on the first day of obseravation don't count it as a trajectory even if it was observed earlier.  
-%             extra_singles = e;
-%             e=e+1;
-%             continue
-%         elseif trajectory(n).allframesobs(1) == day_index(end) % the converse must be taken care of as well.  These will be treated as single obseravations
-%             extra_singles = e;
-%             e=e+1;
-%             continue
-%         else
-%             ltime_cumhist(ni) = length(trajectory(n).framesobs); % get lifetimes, over 4 observations max lifetime is 3 days
-%             if trajectory(n).framesobs(end) == day_index(end)
-%                 censor_vec(ni) = 1; % note whenever the trajectory hits the "wall" (is right censored)
-%             else
-%                 censor_vec(ni) = 0;
-%             end
-%             ni=ni+1;
-%         end
-%     end
-    %all_singles = num_singles+extra_singles; %add on vector observations with just one day of observation within the day range
-    %all_singles = num_singles;
-    %censor_vec = logical(cat(2, censor_vec, zeros(1, all_singles)));    
-    %ltime_cumhist = cat(2, ltime_cumhist, ones(1, all_singles)); %add non-trajectory single particles to cumulative histogram
-    %cumhist = ecdf(ltime_cumhist, 'function', 'survivor', 'censoring', censor_vec);
-    
     %%%%% calculate percentage of puncta that persist from day 1 to day d
     for d = 1:length(day_index)
         persist = zeros(length(trajectory),1);
@@ -211,8 +169,6 @@ for k = 1:roi %for each text file of maxima
                     end
                 end
             end
-            %all_new(n,d) = trajectory(n).new(d);
-            %all_lost(n,d) = trajectory(n).lost(d);
         end        
     end
     for d = 2:length(day_index)
@@ -227,10 +183,6 @@ for k = 1:roi %for each text file of maxima
     allpuncta(k).trajectory = trajectory;
     allpuncta(k).maximaname = maximaname;
     allpuncta(k).imgname = imgname;
-    %allpuncta(k).cumhist = cumhist;
-    %allpuncta(k).lifetimes = ltime_cumhist;
-    %allpuncta(k).censor_vec = censor_vec;
-    %allpuncta(k).puncta_matrix = pun;
     allpuncta(k).numsingles = num_singles;
     allpuncta(k).trajpuncta = sum_total_particles;
     allpuncta(k).propsingle = num_singles/sum_nonend_particles;
@@ -246,7 +198,7 @@ for k = 1:roi %for each text file of maxima
     clear parens traj_idx allpuncta_intraj persist issolo
     clear trajectory maximaname imgname cumhist ltime_cumhist 
     clear censor_vec pun all_singles percent_persistant sum_all_new
-    clear sum_all_lost all_coords
+    clear sum_all_lost all_coords all_new all_lost
 end
 
 end

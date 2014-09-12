@@ -89,17 +89,21 @@ MCdat = img_sn;
 
 % find high-contrast "sharp" puncta
 images_db = double(images);
-for n = 1:size(images,3)
-    offpeak(n) = mean([images_db(4,4,n), images_db(8,4,n), images_db(8,8,n), images_db(4,8,n)]);
-    all_dyn(n) = (images_db(6,6,n)-offpeak(n))/images_db(6,6,n); 
-    if all_dyn(n) < 1 && all_dyn(n) > .90
-        sharp(n) = 1;
-    else
-        sharp(n) = 0;
+thresholds = [.49:.05:.99];
+for t = 1:length(thresholds)
+    for n = 1:size(images,3)
+        offpeak(n,t) = mean([images_db(4,4,n), images_db(8,4,n), images_db(8,8,n), images_db(4,8,n)]);
+        all_dyn(n,t) = (images_db(6,6,n)-offpeak(n))/images_db(6,6,n);
+        if all_dyn(n,t) < 1 && all_dyn(n) > thresholds(t)
+            sharp(n) = 1;
+        else
+            sharp(n) = 0;
+        end
     end
+    sharp = logical(sharp);
+    sharp_images(t).img = images(:,:,sharp);
 end
-sharp = logical(sharp);
-sharp_images = images(:,:,sharp);
+
 
 [first_mean, firstsem, mean_first] = imgreduce(img_first);
     first_sn = nanmean(MCdat(first_idx));
@@ -113,7 +117,12 @@ sharp_images = images(:,:,sharp);
     last_sn = nanmean(MCdat(last_idx));
 [stable_mean, stablesem, mean_stable] = imgreduce(img_stable);
 [all_mean, allsem, mean_all] = imgreduce(images);
-[sharp_mean, sharpsem, mean_sharp] = imgreduce(sharp_images);
+
+for t = 1:length(thresholds)
+    [sharp_mean(:,t), sharpsem(:,t), mean_sharp(:,:,t)] = imgreduce(sharp_images(t).img);
+    %[sigmaNew(t),muNew(t),Anew(t)]=mygaussfit([1:length(sharp_mean(:,t))],(sharp_mean(:,t));
+    %y(:,t)=Anew(t)*exp(-(x-muNew(t)).^2/(2*sigmaNew(t)^2));
+end
 
 %figure; errorbar(first_mean,firstsem, 'k');hold on;errorbar(last_mean,lastsem, 'r');
 figure; errorbar(first_mean,firstsem, 'color', plotcolors(1,:));hold on;
