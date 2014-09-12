@@ -36,7 +36,7 @@ for k = 1:roi %for each text file of maxima
     total_particles = total_particles(total_indxs); % first use of "frame" does not accompagny data
     total_particles = str2double(total_particles(1:length(total_particles)/2)); % cut out text data trailing particle data
     total_days = length(total_particles); % detecting the number of days (frames)
-    day_index = intersect(days_toanalyze, 1:total_days); % "day_index" correct any mismatch between "days_toanalyze" and actual number of days
+    day_index = intersect(days_toanalyze, 1:total_days);
     if isempty(day_index) % must assume first day is always day 1
         continue % skip to next .txt file
     elseif length(day_index) == 1 %if there is only one frame of the roi in your day range skip it
@@ -75,10 +75,10 @@ for k = 1:roi %for each text file of maxima
             framesobs = str2double(frame(traj_idx(t):(traj_idx(t+1)-3))); %subtract 3 to index past the two "%%" marks
         end
         framesobs = framesobs + 1; %add 1 so that first observation is day 1 not day 0
-        if isempty(intersect(framesobs, day_index)); % must assume first day is always day 1
+        if isempty(intersect(framesobs, days_toanalyze)); % must assume first day is always day 1
             continue % skip to next trajectory
         else
-            [nn, fr_intsect, nm] = intersect(framesobs, day_index); %fr_intsect indexes the text file to get trajectory info
+            [nn, fr_intsect, nm] = intersect(framesobs, days_toanalyze); %fr_intsect indexes the text file to get trajectory info
             if length(fr_intsect) >= 1
                 for n = 1:length(framesobs)
                     allx(n) = str2double(x_traj{traj_idx(t)+n-1});
@@ -136,14 +136,20 @@ for k = 1:roi %for each text file of maxima
     
     %%%%% calculate percentage of puncta that persist from day 1 to day d
     for d = 1:length(day_index)
-        persist = zeros(length(trajectory),1);
-        if d == 1
-            percent_persistant(d) = 1; %all observations start day 1
-        else
+        persist = zeros(length(trajectory),1); %use this to count trajectories that persist past day 1
+        obs = persist; %use this to count number of trajectory that start on day 1
+         if d == 1
+             percent_persistant(d) = 1; % everything is observed on day 1
+         else
             for n = 1:length(trajectory)
-                len = length(intersect(trajectory(n).framesobs, day_index(1:d))); % find trajectories with length 1:d
-                if len == d
-                    persist(n) = 1;
+                if ~isempty(trajectory(n).framesobs
+                    if trajectory(n).framesobs(1) == 1 %if puncta observed on day 1
+                        obs(n) = 1;
+                        len = length(intersect(trajectory(n).framesobs, day_index(1:d))); % find trajectories with length 1:d
+                        if len == d
+                            persist(n) = 1;
+                        end
+                    end
                 end
             end            
             percent_persistant(d) = sum(persist)/total_particles(day_index(1));

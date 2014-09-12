@@ -9,7 +9,7 @@ rootdirs = {'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\all_latden\
 %      'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\TC\',...
 %      'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\TCenriched\',...
 %     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\10min_control\'};
-days = [1:4; 1:4]; % days to analyze, lengths must be the same
+days = [1:8; 1:8]; % days to analyze, lengths must be the same
 groupnames = {'all' '10m'};% 'TCall' 'TCnon' 'TCenr' '10min'}; %these names must contain the same number of characters
 %{'ALLMCbse' 'MCnonenr' 'MClast_4' 'ALLTCbse' 'TCnonenr' 'TClast_4' ' control'};
 control_group = 7; % which rootdir contains the control data
@@ -17,7 +17,7 @@ control_group = 7; % which rootdir contains the control data
 %% plotcolors = {'k', 'r', 'b'};
 plotcolors = [31 119 180; 255 127 14; 44 160 44; 214 39 40; 148 103 189; 140 86 75;...
     227 119 194]./255;%; 127 127 127; 188 189 34; 23 190 207]./255); % Tableau 10 Palette, reverse order
-start_slope = 2; %day on which to start slope calculation.  Choose 2 to avoid day1-2 nonlinearity
+start_slope = 1; %day on which to start slope calculation.  Choose 2 to avoid day1-2 nonlinearity
 
 figure
 for n = 1:length(rootdirs)

@@ -89,32 +89,38 @@ MCdat = img_sn;
 
 % find high-contrast "sharp" puncta
 images_db = double(images);
-ranks = [100, 70, 50, 30, 10, 5, 3, 1, .5, .3]; % ranks to extract, in %, pseudo log scale
+%thresholds = [.5 .6 .7 .8 .85 .9 .95 .96 .97 .98 .985 .99 .995];
 for n = 1:size(images,3)
     offpeak(n) = mean([images_db(4,4,n), images_db(8,4,n), images_db(8,8,n), images_db(4,8,n)]);
-    %meanpeak(n) = mean(mean(images_db(5:7, 5:7, n)));
-    %offpeak(n) = mean([images_db(5,5,n), images_db(7,5,n), images_db(7,7,n), images_db(5,7,n)]);
-    meanpeak(n) = images_db(6, 6, n);
+    meanpeak(n) = mean(mean(images_db(5:7, 5:7, n)));
     all_dyn(n) = (meanpeak(n)-offpeak(n))/meanpeak(n);
 end
 all_dyn(all_dyn < 0) = NaN;
-include_imgs = find(isfinite(all_dyn));
-images_finite = images(:,:,include_imgs);
-all_dyn_finite = all_dyn(isfinite(all_dyn));
-[rankedsharp, rank_idx] = sort(all_dyn_finite, 'descend');
+all_dyn_finite = isfinite(all_dyn)
+% for t = 1:length(thresholds)
+%     for n = 1:size(images,3)
+%         if all_dyn(n) < 1 && all_dyn(n) > thresholds(t)
+%             sharp(n) = 1;
+%         else
+%             sharp(n) = 0;
+%         end
+%     end
+%     sharp = logical(sharp);
+%     sharp_images(t).img = images(:,:,sharp);
+% end
+[rankedsharp rank_idx] = sort(all_dyn);
+ranks = [50, 40, 30, 20, 10, 5, 4, 3, 2, 1, .5]; % ranks to extract, in %
 for r = 1:length(ranks)
-    to_take(r) = ceil(length(all_dyn_finite)*ranks(r)*.01); %number of elements to take
-    taken = rank_idx(1:to_take(r)); %get the first x images indexes
-    top_imgs = images_finite(:,:,taken);
+    to_take(r) = ceil(length(all_dyn)*ranks(r)*.01); %number of elements to take
+    taken = rank_idx(1:to_take(r));
+    top_imgs = images(:,:,taken);
     [sharp_mean(:,r), sharpsem(:,r), mean_sharp(:,:,r)] = imgreduce(top_imgs);
-    [fitobject, gof(r)] = fit((1:length(sharp_mean(:,r)))', sharp_mean(:,r), 'gauss1');
+    fitobject = fit((1:length(sharp_mean(:,r)))', sharp_mean(:,r), 'gauss2');
     c = coeffvalues(fitobject); c = c(3);
     fwhm(r) = 2.35482*c*0.182; % conversion from c to fwhm in microns
-    errors(r) = gof(r).rmse;
     clear top_imgs fitobject taken top_imgs
 end
-semilogx(ranks, fwhm, 'k'); hold on;
-%semilogx(ranks, errors, 'r');
+scatter(thresholds, fwhm);
 
 [first_mean, firstsem, mean_first] = imgreduce(img_first);
     first_sn = nanmean(MCdat(first_idx));
