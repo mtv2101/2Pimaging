@@ -47,23 +47,6 @@ for n = 1:length(rootdirs)
     %legend(groupnames{n}, 'Location', 'SouthWest', 'TextColor', plotcolors(n));
 end
 
-% rearrange cumulative histogram data into group x day cell array 
-% this makes it much easier to run stats
-% for i = 2:size(days,2) %we will ignore the first day of a trajectory which is always observed   
-%     for n = 1:length(rootdirs)    
-%         onegroup_cumhist = {};
-%         for k = 1:size(all_cumhist,1) 
-%             cumhist = all_cumhist{k,n};
-%             %for c = 2:length(cumhist) %not all cumhistograms ahve hte same number of values - i.e. conditions may make just be one or two observations
-%             if length(all_cumhist{k,n}) >=i
-%                 onegroup_cumhist = cat(1, onegroup_cumhist, cumhist(i));
-%             else continue
-%             end
-%         end
-%         allgroup_cumhist{n,i} = onegroup_cumhist; clear onegroup_cumhist;
-%     end    
-% end
-
 % do the same for percent persistant puncta
 for i = 1:size(days,2) 
     for n = 1:length(rootdirs)    
@@ -89,31 +72,6 @@ for n = 1:length(rootdirs)
     xlim([0 12]);
 end
 
-%plot box plots of all cumulative lifetime values
-% for i = 2:size(days,2)
-%     for n = 1:length(rootdirs)    
-%         if n == 1
-%             proplife_names = repmat(groupnames{n}, length(allgroup_cumhist{n,i}), 1);
-%             proplife = [(allgroup_cumhist{n,i})];
-%         else
-%             proplife_names = vertcat(proplife_names, repmat(groupnames{n}, length(allgroup_cumhist{n,i}), 1));
-%             proplife = vertcat(proplife, [(allgroup_cumhist{n,i})]);
-%         end
-%     end
-%     all_proplife{:,i} = proplife; clear proplife;
-%     all_proplife_names{:,i} = proplife_names; clear propsingle_names;
-%     anova1(cell2mat(all_proplife{:,i}), all_proplife_names{:,i});
-% end
-% figure;
-% for n = 1:size(allgroup_cumhist, 1)  
-%     for i = 2:size(allgroup_cumhist, 2)
-%         mean_proplife(n,i-1) = mean(cell2mat(allgroup_cumhist{n,i}));
-%         sem_proplife(n,i-1) = std(cell2mat(allgroup_cumhist{n,i}))/sqrt(length(allgroup_cumhist{n,i}));        
-%     end
-%     errorbar(mean_proplife(n,:), sem_proplife(n,:), 'color',  plotcolors(n,:)); hold on;
-%     ylim([0 1]);
-% end
-
 %plot percentage of persistant puncta
 figure;
 for n = 1:size(persistant_puncta, 1)
@@ -123,6 +81,24 @@ for n = 1:size(persistant_puncta, 1)
     end
     errorbar(mean_pp(n,:), sem_pp(n,:), 'color',  plotcolors(n,:)); hold on;
     ylim([0 1]);
+end
+
+% get %new per day and %lost per day
+for n = 1:length(rootdirs)
+    new_daily = NaN(length(condition(n).allpuncta), size(days,2));
+    lost_daily = NaN(length(condition(n).allpuncta), size(days,2));
+    for x = 1:length(condition(n).allpuncta)
+        for d = 2:length(condition(n).allpuncta(x).new)-1
+            new_daily(x,d) = condition(n).allpuncta(x).new(d) / condition(n).allpuncta(x).traj_perday(d);
+            lost_daily(x,d) = condition(n).allpuncta(x).lost(d) / condition(n).allpuncta(x).traj_perday(d);
+        end
+    end
+    mean_newday(:,n) = nanmean(new_daily(:,2:end-1),1);
+    sem_newday(:,n) = nanstd(new_daily(:,2:end-1), [], 1)/sqrt(size(new_daily,1));
+    subplot(2,1,1);errorbar(mean_newday(:,n), sem_newday(:,n), 'color', plotcolors(n,:)); hold on;
+    mean_lday(:,n) = nanmean(lost_daily(:,2:end-1),1);
+    sem_lday(:,n) = nanstd(lost_daily(:,2:end-1), [], 1)/sqrt(size(lost_daily,1));
+    subplot(2,1,2);errorbar(mean_lday(:,n), sem_lday(:,n), 'color', plotcolors(n,:)); hold on;
 end
 
 %plot all new/lost ratio
@@ -145,45 +121,6 @@ for n = 1:length(rootdirs)
 end
 [nl_p, nl_table, nl_stats] = anova1(anova_nl, nl_names);
 figure; nl_multcompare = multcompare(nl_stats);
-
-%get new/lost ratio by day
-% for n = 1:length(rootdirs)
-%     nl_daily = NaN(length(condition(n).allpuncta), size(days,2));
-%         for x = 1:length(condition(n).allpuncta)
-%             for d = 2:length(condition(n).allpuncta(x).new)-1
-%                 nl_daily(x,d) = [condition(n).allpuncta(x).new(d)]/[condition(n).allpuncta(x).lost(d)];
-%             end
-%         end
-%     mean_nl(:,n) = nanmean(nl_daily,1);
-%     sem_nl(:,n) = nanstd(nl_daily, [], 1)/sqrt(size(nl_daily,1));
-%     clear nl_daily
-%     errorbar(mean_nl(:,n), sem_nl(:,n), 'color', plotcolors(n,:)); hold on;
-% end
-
-% get %new per day and %lost per day
-for n = 1:length(rootdirs)
-    new_daily = NaN(length(condition(n).allpuncta), size(days,2));
-    lost_daily = NaN(length(condition(n).allpuncta), size(days,2));
-    for x = 1:length(condition(n).allpuncta)
-        for d = 2:length(condition(n).allpuncta(x).new)-1
-            new_daily(x,d) = condition(n).allpuncta(x).new(d) / condition(n).allpuncta(x).traj_perday(d);
-            lost_daily(x,d) = condition(n).allpuncta(x).lost(d) / condition(n).allpuncta(x).traj_perday(d);
-        end
-    end
-    mean_newday(:,n) = nanmean(new_daily(:,2:end-1),1);
-    sem_newday(:,n) = nanstd(new_daily(:,2:end-1), [], 1)/sqrt(size(new_daily,1));
-    subplot(2,1,1);errorbar(mean_newday(:,n), sem_newday(:,n), 'color', plotcolors(n,:)); hold on;
-    mean_lday(:,n) = nanmean(lost_daily(:,2:end-1),1);
-    sem_lday(:,n) = nanstd(lost_daily(:,2:end-1), [], 1)/sqrt(size(lost_daily,1));
-    subplot(2,1,2);errorbar(mean_lday(:,n), sem_lday(:,n), 'color', plotcolors(n,:)); hold on;
-end
-
-% for n = 1:length(rootdirs)
-%     mean_nl_daily = squeeze(nanmean(nl_daily,2));
-%     sem_nl_daily = squeeze(nanstd(nl_daily,2)/sqrt(size(nl_daily),2));
-%     errorbar(mean_nl_daily(:,n), sem_nl_daily(:,n), 'color',  plotcolors(n,:)); hold on;
-% end   
-%end
 
 %plot all proportion of singles
 for n = 1:length(rootdirs)
