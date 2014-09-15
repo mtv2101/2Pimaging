@@ -153,13 +153,14 @@ for k = 1:roi %for each text file of maxima
     
     %%%% get number of trajectory puncta present on each day
     hastraj = zeros(length(trajectory), length(day_index));
-         for n = 1:length(trajectory)
-            for d = 1:length(trajectory(n).framesobs)
-                hastraj(n,trajectory(n).framesobs(d)) = 1; 
-            end
-         end
+    for n = 1:length(trajectory)
+        for d = 1:length(trajectory(n).framesobs)
+            [val, idx, blah] = intersect(day_index, trajectory(n).framesobs(d));
+            hastraj(n,idx) = 1;
+        end
+    end
     traj_perday = sum(hastraj, 1);
-    clear hastraj  
+    clear hastraj
                  
     %%%% caluclate number of new and lost trajectories in middle-observed days
     %%%% only count trajectories that persist for >= 2 days

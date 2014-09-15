@@ -2,17 +2,20 @@ clear all;
 
 warning('off','all');
 
-rootdirs = {'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\MCenriched\',...
-    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\TCenriched\',...
-    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\glomenriched\',...
-    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\10min_control\'};%...
+rootdirs = {'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\all_latden\',...
+    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\MCenriched\'};%,...
+%    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\TCenriched\',...
+%    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\TCenriched\',...
+%    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\glomenriched\',...
+%    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\glomenriched\'};%,...
+%    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\10min_control\'};%...
 %     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\MCenriched\'};%,...    
 %      'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\ALLTC\',...
 %      'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\TC\',...
 %      'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\TCenriched\',...
 %     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\10min_control\'};
-days = [1:8; 1:8; 1:8; 1:8]; % days to analyze, lengths must be the same
-groupnames = {'MCe' 'TCe' 'GLe' '10m'};% 'TCall' 'TCnon' 'TCenr' '10min'}; %these names must contain the same number of characters
+days = [1:4; 5:8];% 1:4; 5:8; 1:4; 5:8]; % days to analyze, lengths must be the same
+groupnames = {'MCb' 'MCe'};% 'TCb' 'TCe' 'GLb' 'GLe'};% 'TCall' 'TCnon' 'TCenr' '10min'}; %these names must contain the same number of characters
 %{'ALLMCbse' 'MCnonenr' 'MClast_4' 'ALLTCbse' 'TCnonenr' 'TClast_4' ' control'};
 control_group = 7; % which rootdir contains the control data
 
@@ -79,7 +82,7 @@ for n = 1:size(persistant_puncta, 1)
         mean_pp(n,i) = mean(cell2mat(persistant_puncta{n,i}));
         sem_pp(n,i) = std(cell2mat(persistant_puncta{n,i}))/sqrt(length(persistant_puncta{n,i}));
     end
-    errorbar(mean_pp(n,:), sem_pp(n,:), 'color',  plotcolors(n,:)); hold on;
+    %errorbar(mean_pp(n,:), sem_pp(n,:), 'color',  plotcolors(n,:)); hold on;
     ylim([0 1]);
 end
 
@@ -99,7 +102,31 @@ for n = 1:length(rootdirs)
     mean_lday(:,n) = nanmean(lost_daily(:,2:end-1),1);
     sem_lday(:,n) = nanstd(lost_daily(:,2:end-1), [], 1)/sqrt(size(lost_daily,1));
     subplot(2,1,2);errorbar(mean_lday(:,n), sem_lday(:,n), 'color', plotcolors(n,:)); hold on;
+    newday_lin = nanmean(new_daily,2);
+    %newday_lin = newday_lin(:);
+    newday_lin = newday_lin(~isnan(newday_lin)); %remove NaNs
+    lostday_lin = nanmean(lost_daily,2);
+    %lostday_lin = lostday_lin(:);
+    lostday_lin = lostday_lin(~isnan(lostday_lin));
+    if n == 1
+        newday_names = repmat(groupnames{n}, length(newday_lin), 1);
+        newday_anova = newday_lin;
+        lostday_names = repmat(groupnames{n}, length(lostday_lin), 1);
+        lostday_anova = lostday_lin;
+    else
+        newday_names = vertcat(newday_names, repmat(groupnames{n}, length(newday_lin), 1));
+        newday_anova = vertcat(newday_anova, newday_lin);
+        lostday_names = vertcat(lostday_names, repmat(groupnames{n}, length(lostday_lin), 1));
+        lostday_anova = vertcat(lostday_anova, lostday_lin);
+    end        
+    clear new_daily lost_daily
 end
+[new_p, new_table, new_stats] = anova1(newday_anova, newday_names);
+newfig = gcf; title('Mean % new puncta created per day');
+figure; new_multcompare = multcompare(new_stats);
+[lost_p, lost_table, lost_stats] = anova1(lostday_anova, lostday_names);
+lostfig = gcf; title('Mean % puncta lost per day');
+figure; lost_multcompare = multcompare(lost_stats);
 
 %plot all new/lost ratio
 for n = 1:length(rootdirs)
@@ -134,7 +161,7 @@ for n = 1:length(rootdirs)
         %end
     end
 end
-[singles_p, singles_table, singles_stats] = anova1(anova_singles, propsingle_names);
+%[singles_p, singles_table, singles_stats] = anova1(anova_singles, propsingle_names);
 %singles_multcompare = multcompare(singles_stats);
 
 % plot the slopes of whatever survival/lifetime measurement was made above (ecdf or persistance)
