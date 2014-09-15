@@ -12,9 +12,9 @@ output[i]=columns[2];
 outputdir = output[i] + "batch output" + File.separator + File.separator;
 listtemp= getFileList(outputdir);
 for (k = 0; k < listtemp.length; k++) {
-	if (1 == endsWith(listtemp[k], "2dtseries.tif")) {
+	if (1 == endsWith(listtemp[k], "2dtseries_edited.tif")) {
         	open(outputdir + listtemp[k]);
-	run("Enhance Contrast...", "saturated=0.01 normalize process_all");
+	//run("Enhance Contrast...", "saturated=0.01 normalize process_all");
         	Stack.getDimensions(width, height, channels, slices, frames) 
         		for (n = 0; n < slices; n++) {
         		Stack.setSlice(n+1)

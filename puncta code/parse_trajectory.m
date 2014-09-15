@@ -151,8 +151,18 @@ for k = 1:roi %for each text file of maxima
         clear persist
     end
     
+    %%%% get number of trajectory puncta present on each day
+    hastraj = zeros(length(trajectory), length(day_index));
+         for n = 1:length(trajectory)
+            for d = 1:length(trajectory(n).framesobs)
+                hastraj(n,trajectory(n).framesobs(d)) = 1; 
+            end
+         end
+    traj_perday = sum(hastraj, 1);
+    clear hastraj  
+                 
     %%%% caluclate number of new and lost trajectories in middle-observed days
-    %%%%% only count trajectories that persist for > 2 days
+    %%%% only count trajectories that persist for >= 2 days
     for d = 2:length(day_index) %all puncta new on first observation so ignore
         for n = 1:length(trajectory)
             trajectory(n).new(d) = 0;  
@@ -184,7 +194,8 @@ for k = 1:roi %for each text file of maxima
     allpuncta(k).maximaname = maximaname;
     allpuncta(k).imgname = imgname;
     allpuncta(k).numsingles = num_singles;
-    allpuncta(k).trajpuncta = sum_total_particles;
+    allpuncta(k).totalpuncta = sum_total_particles;
+    allpuncta(k).traj_perday = traj_perday;
     allpuncta(k).propsingle = num_singles/sum_nonend_particles;
     allpuncta(k).percent_persistant = percent_persistant;
     allpuncta(k).new = sum_all_new;
@@ -198,7 +209,7 @@ for k = 1:roi %for each text file of maxima
     clear parens traj_idx allpuncta_intraj persist issolo
     clear trajectory maximaname imgname cumhist ltime_cumhist 
     clear censor_vec pun all_singles percent_persistant sum_all_new
-    clear sum_all_lost all_coords all_new all_lost
+    clear sum_all_lost all_coords all_new all_lost traj_perday
 end
 
 end

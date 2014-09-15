@@ -85,11 +85,9 @@ for n = 1:size(images,3)
 end
 MCdat = img_sn;
 
-%ecdf(img_sn, 'alpha', .05, 'bounds', 'on');
-
 % find high-contrast "sharp" puncta
 images_db = double(images);
-ranks = [100, 70, 50, 30, 10, 5, 3, 1, .5, .3]; % ranks to extract, in %, pseudo log scale
+ranks = [.5, 1, 2, 3, 5, 10, 20, 30, 50, 70, 90]; % ranks to extract, in %, pseudo log scale
 for n = 1:size(images,3)
     offpeak(n) = mean([images_db(4,4,n), images_db(8,4,n), images_db(8,8,n), images_db(4,8,n)]);
     %meanpeak(n) = mean(mean(images_db(5:7, 5:7, n)));
@@ -102,19 +100,21 @@ include_imgs = find(isfinite(all_dyn));
 images_finite = images(:,:,include_imgs);
 all_dyn_finite = all_dyn(isfinite(all_dyn));
 [rankedsharp, rank_idx] = sort(all_dyn_finite, 'descend');
+len_dat = length(all_dyn_finite);
+to_take = floor(len_dat*.005); % take 0.5% of data at each interval
 for r = 1:length(ranks)
-    to_take(r) = ceil(length(all_dyn_finite)*ranks(r)*.01); %number of elements to take
-    taken = rank_idx(1:to_take(r)); %get the first x images indexes
+    end_take(r) = floor(ranks(r)*len_dat*.01);
+    taken = rank_idx((end_take(r)-to_take+1):end_take(r)); %get 1% data at each rank position
     top_imgs = images_finite(:,:,taken);
     [sharp_mean(:,r), sharpsem(:,r), mean_sharp(:,:,r)] = imgreduce(top_imgs);
     [fitobject, gof(r)] = fit((1:length(sharp_mean(:,r)))', sharp_mean(:,r), 'gauss1');
     c = coeffvalues(fitobject); c = c(3);
     fwhm(r) = 2.35482*c*0.182; % conversion from c to fwhm in microns
-    errors(r) = gof(r).rmse;
+    errors(r) = gof(r).rsquare;
     clear top_imgs fitobject taken top_imgs
 end
 semilogx(ranks, fwhm, 'k'); hold on;
-%semilogx(ranks, errors, 'r');
+semilogx(ranks, errors, 'r');
 
 [first_mean, firstsem, mean_first] = imgreduce(img_first);
     first_sn = nanmean(MCdat(first_idx));
@@ -128,14 +128,6 @@ semilogx(ranks, fwhm, 'k'); hold on;
     last_sn = nanmean(MCdat(last_idx));
 [stable_mean, stablesem, mean_stable] = imgreduce(img_stable);
 [all_mean, allsem, mean_all] = imgreduce(images);
-
-% for t = 1:length(thresholds)
-%     [sharp_mean(:,t), sharpsem(:,t), mean_sharp(:,:,t)] = imgreduce(sharp_images(t).img);
-%     fitobject = fit((1:length(sharp_mean(:,t)))', sharp_mean(:,t), 'gauss1');
-%     c = coeffvalues(fitobject); c = c(3);
-%     fwhm(t) = 2.35482*c*0.182; % conversion from c to fwhm in microns
-% end
-%%%
 
 %figure; errorbar(first_mean,firstsem, 'k');hold on;errorbar(last_mean,lastsem, 'r');
 figure; errorbar(first_mean,firstsem, 'color', plotcolors(1,:));hold on;

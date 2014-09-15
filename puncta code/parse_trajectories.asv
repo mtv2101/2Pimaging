@@ -2,8 +2,7 @@ clear all;
 
 warning('off','all');
 
-rootdirs = {'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\MCenriched\',...
-    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\TCenriched\',...
+rootdirs = {'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\all_latden\',...
     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\glomenriched\',...
     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\10min_control\'};%...
 %     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\MCenriched\'};%,...    
@@ -11,8 +10,8 @@ rootdirs = {'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\MCenriched\
 %      'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\TC\',...
 %      'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\TCenriched\',...
 %     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\10min_control\'};
-days = [1:8; 1:8; 1:8; 1:8]; % days to analyze, lengths must be the same
-groupnames = {'MCe' 'TCe' 'GLe' '10m'};% 'TCall' 'TCnon' 'TCenr' '10min'}; %these names must contain the same number of characters
+days = [1:4; 1:4; 1:4]; % days to analyze, lengths must be the same
+groupnames = {'lat' 'glm' '10m'};% 'TCall' 'TCnon' 'TCenr' '10min'}; %these names must contain the same number of characters
 %{'ALLMCbse' 'MCnonenr' 'MClast_4' 'ALLTCbse' 'TCnonenr' 'TClast_4' ' control'};
 control_group = 7; % which rootdir contains the control data
 
@@ -164,18 +163,17 @@ figure; nl_multcompare = multcompare(nl_stats);
 for n = 1:length(rootdirs)
     new_daily = NaN(length(condition(n).allpuncta), size(days,2));
     lost_daily = NaN(length(condition(n).allpuncta), size(days,2));
-    for x = 1:length(condition(n).allpuncta)
+    for x = 1:length(condition(n).allpuncta)4
         for d = 2:length(condition(n).allpuncta(x).new)-1
-            new_daily(x,d) = condition(n).allpuncta(x).new(d) / condition(n).allpuncta(x).traj_perday(d);
-            lost_daily(x,d) = condition(n).allpuncta(x).lost(d) / condition(n).allpuncta(x).traj_perday(d);
+            new_daily(x,d) = condition(n).allpuncta(x).new(d) / condition(n).allpuncta(x).traj_perday(d)
         end
     end
-    mean_newday(:,n) = nanmean(new_daily(:,2:end-1),1);
-    sem_newday(:,n) = nanstd(new_daily(:,2:end-1), [], 1)/sqrt(size(new_daily,1));
-    subplot(2,1,1);errorbar(mean_newday(:,n), sem_newday(:,n), 'color', plotcolors(n,:)); hold on;
-    mean_lday(:,n) = nanmean(lost_daily(:,2:end-1),1);
-    sem_lday(:,n) = nanstd(lost_daily(:,2:end-1), [], 1)/sqrt(size(lost_daily,1));
-    subplot(2,1,2);errorbar(mean_lday(:,n), sem_lday(:,n), 'color', plotcolors(n,:)); hold on;
+    mean_newday(:,n) = nanmean(new_daily,1);
+    sem_newday(:,n) = nanstd(new_daily, [], 1)/sqrt(size(new_daily,1));
+    subplot(1,1,n);errorbar(mean_newday(:,n), sem_newday(:,n), 'color', plotcolors(n,:)); hold on;
+    mean_lday(:,n) = nanmean(lost_daily,1);
+    sem_lday(:,n) = nanstd(lost_daily, [], 1)/sqrt(size(lost_daily,1));
+    subplot(2,1,n);errorbar(mean_newday(:,n), sem_newday(:,n), 'color', plotcolors(n,:)); hold on;
 end
 
 % for n = 1:length(rootdirs)
