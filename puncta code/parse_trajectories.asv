@@ -20,15 +20,9 @@ groupnames = {'MC' 'TC' 'GL' '10'};% 'TCb' 'TCe' 'GLb' 'GLe'};% 'TCall' 'TCnon' 
 control_group = 7; % which rootdir contains the control data
 
 % plotcolors = {'k', 'r', 'b'};
-%plotcolors = [31 119 180; 255 127 14; 44 160 44; 214 39 40; 148 103 189; 140 86 75;...
-    %227 119 194]./255;%; 127 127 127; 188 189 34; 23 190 207]./255); % Tableau 10 Palette, reverse order
-blue = [31 119 180]./255;
-orange = [255 127 14]./255;
-green = [44 160 44]./255;
-red = [214 39 40]./255;
-purple = [148 103 189]./255;
-brown = [140 86 75]./255;
-plotcolors = [red; blue; brown; orange];
+plotcolors = [31 119 180; 255 127 14; 44 160 44; 214 39 40; 148 103 189; 140 86 75;...
+    227 119 194]./255;%; 127 127 127; 188 189 34; 23 190 207]./255); % Tableau 10 Palette, reverse order
+blue = [31 119 180];
 start_slope = 1; %day on which to start slope calculation.  Choose 2 to avoid day1-2 nonlinearity
 
 % Choose plots
@@ -146,11 +140,11 @@ if PLOT_NLDAYS == 1
         clear new_daily lost_daily
     end
     [new_p, new_table, new_stats] = anova1(newday_anova, newday_names, 'off');
-    figure;boxplot(newday_anova, newday_names, 'notch', 'off', 'color', plotcolors(n,:));
+    figure;boxplot(newday_anova, newday_names, 'notch', 'off');
     newfig = gcf; title('Mean % new puncta created per day');
     %figure; new_multcompare = multcompare(new_stats);
     [lost_p, lost_table, lost_stats] = anova1(lostday_anova, lostday_names, 'off');
-    figure;boxplot(lostday_anova, lostday_names, 'notch', 'off', 'color', plotcolors(n,:));
+    figure;boxplot(lostday_anova, lostday_names, 'notch', 'off');
     lostfig = gcf; title('Mean % puncta lost per day');
     %figure; lost_multcompare = multcompare(lost_stats);
 end
@@ -175,7 +169,7 @@ if PLOT_NLRATIO == 1
         clear ratio r
     end
     [nl_p, nl_table, nl_stats] = anova1(anova_nl, nl_names, 'off');
-    figure;boxplot(anova_nl, nl_names, 'notch', 'off', 'color', plotcolors(n,:));
+    figure;boxplot(anova_nl, nl_names, 'notch', 'off');
     %figure; nl_multcompare = multcompare(nl_stats);
 end
 
@@ -193,7 +187,7 @@ if PLOT_SINGLES == 1
         end
     end
     [singles_p, singles_table, singles_stats] = anova1(anova_singles, propsingle_names, 'off');
-    figure;boxplot(anova_singles, propsingle_names, 'notch', 'off', 'color', plotcolors(n,:))
+    figure;boxplot(anova_singles, propsingle_names, 'notch', 'off')
     %figure; singles_multcompare = multcompare(singles_stats);
 end
 
@@ -216,6 +210,6 @@ if PLOT_SLOPES == 1
     end
     %anova_slopes_norm = anova_slopes - mean_base; % subtract mean value of short-term observations from daily observations
     [slopes_p, slopes_table, slopes_stats] = anova1(anova_slopes, slope_names, 'off');
-    figure;boxplot(anova_slopes, slope_names, 'notch', 'off', 'color', plotcolors(n,:));
+    figure;boxplot(anova_slopes, slope_names, 'notch', 'off');
     %figure;slopes_multcompare = multcompare(slopes_stats);
 end
