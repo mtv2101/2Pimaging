@@ -2,10 +2,10 @@ clear all;
 
 warning('off','all');
 
-rootdirs = {'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\ALLMC\',...
-    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\ALLTC\',...
-    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\ALLGL\',...
-    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\10min_control\'};%,...
+rootdirs = {'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\all_latden\',...
+    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\MC\',...
+    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\MCenriched\'};%,...
+%    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\10min_control\'};%,...
 %    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\glomenriched\',...
 %    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\glomenriched\'};%,...
 %    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\10min_control\'};%...
@@ -14,8 +14,8 @@ rootdirs = {'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\ALLMC\',...
 %      'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\TC\',...
 %      'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\TCenriched\',...
 %     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\10min_control\'};
-days = [1:4; 1:4; 1:4; 1:4];%; 1:4; 5:8]; % days to analyze, lengths must be the same
-groupnames = {'MC' 'TC' 'GL' '10'};% 'TCb' 'TCe' 'GLb' 'GLe'};% 'TCall' 'TCnon' 'TCenr' '10min'}; %these names must contain the same number of characters
+days = [1:4; 5:8; 5:8];%; 1:4; 5:8]; % days to analyze, lengths must be the same
+groupnames = {'bse' 'MCc' 'MCe'};% 'TCb' 'TCe' 'GLb' 'GLe'};% 'TCall' 'TCnon' 'TCenr' '10min'}; %these names must contain the same number of characters
 %{'ALLMCbse' 'MCnonenr' 'MClast_4' 'ALLTCbse' 'TCnonenr' 'TClast_4' ' control'};
 control_group = 7; % which rootdir contains the control data
 
@@ -28,7 +28,7 @@ green = [44 160 44]./255;
 red = [214 39 40]./255;
 purple = [148 103 189]./255;
 brown = [140 86 75]./255;
-plotcolors = [red; blue; brown; orange];
+plotcolors = [red; blue; orange];
 start_slope = 1; %day on which to start slope calculation.  Choose 2 to avoid day1-2 nonlinearity
 
 % Choose plots
@@ -98,7 +98,6 @@ end
 
 %plot percentage of persistant puncta
 if PLOT_PERSIST_PUNCTA == 1
-    figure;
     for n = 1:size(persistant_puncta, 1)
         for i = 1:size(persistant_puncta, 2)
             mean_pp(n,i) = mean(cell2mat(persistant_puncta{n,i}));
@@ -145,14 +144,14 @@ if PLOT_NLDAYS == 1
         end
         clear new_daily lost_daily
     end
-    [new_p, new_table, new_stats] = anova1(newday_anova, newday_names, 'off');
-    figure;boxplot(newday_anova, newday_names, 'notch', 'off', 'color', plotcolors(n,:));
+    figure;boxplot(newday_anova, newday_names, 'notch', 'off', 'color', plotcolors);
     newfig = gcf; title('Mean % new puncta created per day');
-    %figure; new_multcompare = multcompare(new_stats);
-    [lost_p, lost_table, lost_stats] = anova1(lostday_anova, lostday_names, 'off');
-    figure;boxplot(lostday_anova, lostday_names, 'notch', 'off', 'color', plotcolors(n,:));
+    figure;boxplot(lostday_anova, lostday_names, 'notch', 'off', 'color', plotcolors);
     lostfig = gcf; title('Mean % puncta lost per day');
-    %figure; lost_multcompare = multcompare(lost_stats);
+    [new_p, new_table, new_stats] = anova1(newday_anova, newday_names, 'off');
+    figure;new_multcompare = multcompare(new_stats);
+    [lost_p, lost_table, lost_stats] = anova1(lostday_anova, lostday_names, 'off');
+    figure;lost_multcompare = multcompare(lost_stats);
 end
 
 %plot all new/lost ratio
@@ -172,11 +171,11 @@ if PLOT_NLRATIO == 1
             nl_names = vertcat(nl_names, repmat(groupnames{n}, length(ratio), 1));
             anova_nl = vertcat(anova_nl, ratio');
         end
-        clear ratio r
+        clear ratio r        
     end
-    [nl_p, nl_table, nl_stats] = anova1(anova_nl, nl_names, 'off');
-    figure;boxplot(anova_nl, nl_names, 'notch', 'off', 'color', plotcolors(n,:));
-    %figure; nl_multcompare = multcompare(nl_stats);
+    figure;boxplot(anova_nl, nl_names, 'notch', 'off', 'color', plotcolors);
+    [nl_p, nl_table, nl_stats] = anova1(anova_nl, nl_names, 'off');    
+    figure; nl_multcompare = multcompare(nl_stats);
 end
 
 %plot all proportion of singles
@@ -190,11 +189,11 @@ if PLOT_SINGLES == 1
             propsingle_names = vertcat(propsingle_names, repmat(groupnames{n}, length([condition(n).allpuncta.propsingle]), 1));
             anova_singles = vertcat(anova_singles, [condition(n).allpuncta.propsingle]');
             %end
-        end
+        end        
     end
-    [singles_p, singles_table, singles_stats] = anova1(anova_singles, propsingle_names, 'off');
-    figure;boxplot(anova_singles, propsingle_names, 'notch', 'off', 'color', plotcolors(n,:))
-    %figure; singles_multcompare = multcompare(singles_stats);
+    figure;boxplot(anova_singles, propsingle_names, 'notch', 'off', 'color', plotcolors);
+    [singles_p, singles_table, singles_stats] = anova1(anova_singles, propsingle_names, 'off');    
+    figure; singles_multcompare = multcompare(singles_stats);
 end
 
 % plot the slopes of whatever survival/lifetime measurement was made above (ecdf or persistance)
@@ -212,10 +211,10 @@ if PLOT_SLOPES == 1
             %             base_slopes = [stats(n).slopes];
             %             mean_base = mean(base_slopes);
             %         end
-        end
+        end        
     end
+    figure;boxplot(anova_slopes, slope_names, 'notch', 'off', 'color', plotcolors);
     %anova_slopes_norm = anova_slopes - mean_base; % subtract mean value of short-term observations from daily observations
-    [slopes_p, slopes_table, slopes_stats] = anova1(anova_slopes, slope_names, 'off');
-    figure;boxplot(anova_slopes, slope_names, 'notch', 'off', 'color', plotcolors(n,:));
-    %figure;slopes_multcompare = multcompare(slopes_stats);
+    [slopes_p, slopes_table, slopes_stats] = anova1(anova_slopes, slope_names, 'off');    
+    figure; slopes_multcompare = multcompare(slopes_stats);
 end

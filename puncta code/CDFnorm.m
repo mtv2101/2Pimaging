@@ -1,6 +1,6 @@
 clear all;
 
-norm_dir = 'C:\Users\supersub\Desktop\Data\aggregate_all\norm templates\';
+norm_dir = 'C:\Users\supersub\Desktop\Data\aggregate_all\temp_norm\';
 in_dir = 'C:\Users\supersub\Desktop\Data\aggregate_all\temp\';
 out_dir = 'C:\Users\supersub\Desktop\Data\aggregate_all\temp_out\';
 
