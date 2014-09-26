@@ -2,20 +2,20 @@ clear all;
 
 warning('off','all');
 
-rootdirs = {'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\all_latden\',...
-    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\MC\',...
-    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\MCenriched\'};%,...
-%    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\10min_control\'};%,...
-%    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\glomenriched\',...
-%    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\glomenriched\'};%,...
-%    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\10min_control\'};%...
+rootdirs = {'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\ALLMC\',...
+    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\MCenriched\',...
+     'C:\Users\supersub\Desktop\Data\text files\0.5cutoff 8disp\MC\'};%,...
+%     'C:\Users\supersub\Desktop\Data\text files\0.7cutoff 8disp\all_latden\',...
+%     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\all_latden\',...
+%     'C:\Users\supersub\Desktop\Data\text files\2cutoff 8disp\all_latden\',...
+%     'C:\Users\supersub\Desktop\Data\text files\5cutoff 8disp\all_latden\'};%...
 %     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\MCenriched\'};%,...
 %      'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\ALLTC\',...
 %      'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\TC\',...
 %      'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\TCenriched\',...
 %     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\10min_control\'};
 days = [1:4; 5:8; 5:8];%; 1:4; 5:8]; % days to analyze, lengths must be the same
-groupnames = {'bse' 'MCc' 'MCe'};% 'TCb' 'TCe' 'GLb' 'GLe'};% 'TCall' 'TCnon' 'TCenr' '10min'}; %these names must contain the same number of characters
+groupnames = {'ALLMC' 'MCenr' 'MCctl'};% 'TCb' 'TCe' 'GLb' 'GLe'};% 'TCall' 'TCnon' 'TCenr' '10min'}; %these names must contain the same number of characters
 %{'ALLMCbse' 'MCnonenr' 'MClast_4' 'ALLTCbse' 'TCnonenr' 'TClast_4' ' control'};
 control_group = 7; % which rootdir contains the control data
 
@@ -28,17 +28,21 @@ green = [44 160 44]./255;
 red = [214 39 40]./255;
 purple = [148 103 189]./255;
 brown = [140 86 75]./255;
-plotcolors = [red; blue; orange];
+pink = [227 119 194]./255;
+grey = [127 127 127]./255;
+avocado = [188 189 34]./255;
+teal = [23 190 207]./255;
+plotcolors = [blue; orange; red; purple; green; brown; teal];
 start_slope = 1; %day on which to start slope calculation.  Choose 2 to avoid day1-2 nonlinearity
 
 % Choose plots
-PLOT_ALLLIFETIME = 1;
-PLOT_CUMLIFE = 1;
-PLOT_PERSIST_PUNCTA = 1;
-PLOT_NLDAYS = 1;
-PLOT_NLRATIO = 1;
+PLOT_ALLLIFETIME = 0;
+PLOT_CUMLIFE = 0;
+PLOT_PERSIST_PUNCTA = 0;
+PLOT_NLDAYS = 0;
+PLOT_NLRATIO = 0;
 PLOT_SINGLES = 0;
-PLOT_SLOPES = 1;
+PLOT_SLOPES = 0;
 
 for n = 1:length(rootdirs)
     [condition(n).allpuncta, roi] = parse_trajectory(rootdirs{n}, days(n,:));
@@ -56,7 +60,7 @@ for n = 1:length(rootdirs)
             roi_it = roi_it+1; %because some rois dont exist in the time window, "roi" specifies which ones are valid.
         end
     end
-    condition(n).length = pathlengths(condition(n).allpuncta);
+    [condition(n).length, condition(n).theta] = pathlengths(condition(n).allpuncta); %function pathlengths
     clear all_lifetimes
 end
 
@@ -83,14 +87,27 @@ for n = 1:length(rootdirs)
     all_mean_puncta{n} = mean_puncta;
     clear mean_puncta
 end
+
+% get puncta images analysis values
+for n = 1:length(rootdirs)
+   [img_dat(n).maxpeak, img_dat(n).last_peak, img_dat(n).first_peak,...
+        img_dat(n).stable_peak] = analyze_punctaimages(condition(n).allpuncta);
+end
         
 %%%% plotting %%%%
-%plot all cum lifetimes
+% plot image peak ecdf
+for n = 1:length(rootdirs)
+    h = cdfplot(img_dat(n).maxpeak); hold on;
+    set(h,'Color',plotcolors(n,:));
+    xlim([0 255]);
+end
+
+
+%plot all trajectory lengths
 if PLOT_CUMLIFE == 1
     figure;
     for n = 1:length(rootdirs)
         h = cdfplot(condition(n).length); hold on;
-        %legend(groupnames{n}); legend boxoff;
         set(h,'Color',plotcolors(n,:));
         xlim([0 12]);
     end

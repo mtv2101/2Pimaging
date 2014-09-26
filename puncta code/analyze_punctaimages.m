@@ -1,13 +1,15 @@
-dat = condition(1).allpuncta;
+function [maxpeak, last_peak, first_peak, stable_peak] = analyze_punctaimages(dat)
+
+%dat = condition(1).allpuncta;
 
 plotcolors = [31 119 180; 255 127 14; 44 160 44; 214 39 40; 148 103 189; 140 86 75;...
     227 119 194]./255;
 
 % get all images
-lifetimes = [];
+%lifetimes = [];
 i=1;
 for n = 1:size(dat,2); % for each roi
-    lifetimes = cat(2, lifetimes, dat(n).trajectory.lifetime);
+    %lifetimes = cat(2, lifetimes, dat(n).trajectory.lifetime);
     for m = 1:size(dat(n).allimg, 2)
         for k = 1:size(dat(n).allimg(m).img, 3)
             if isempty(dat(n).allimg(m).img(:,:,k)) == 1
@@ -30,7 +32,7 @@ img_last = []; last_idx = logical(zeros(1,size(images, 3)));
 img_stable = []; 
 i = 1;
 for n = 1:size(dat,2);
-    lifetimes = cat(2, lifetimes, dat(n).trajectory.lifetime);
+    %lifetimes = cat(2, lifetimes, dat(n).trajectory.lifetime);
     for m = 1:size(dat(n).allimg, 2)
         for k = 1:size(dat(n).allimg(m).img, 3) %for each day
             if isempty(dat(n).allimg(m).img(:,:,k)) == 1 %if image is filled with NaNs becuase it crosses fov border
@@ -98,11 +100,22 @@ MCdat = img_sn;
 % find high-contrast "sharp" puncta
 images_db = double(images);
 ranks = [.5, 1, 2, 3, 5, 10, 20, 30, 50, 70, 90]; % ranks to extract, in %, pseudo log scale
+
 for n = 1:size(images,3)
     offpeak(n) = mean([images_db(4,4,n), images_db(8,4,n), images_db(8,8,n), images_db(4,8,n)]);
-    %meanpeak(n) = mean(mean(images_db(5:7, 5:7, n)));
+    meanpeak(n) = mean(mean(images_db(5:7, 5:7, n)));
+    maxpeak(n) = max(max(images_db(5:7, 5:7, n),[],2),[],1);
+    if n<=size(img_last,3)
+        last_peak(n) = max(max(img_last(5:7, 5:7, n),[],2),[],1);
+    end
+    if n<=size(img_stable,3)
+        stable_peak(n) = max(max(img_stable(5:7, 5:7, n),[],2),[],1);
+    end
+    if n<=size(img_first,3)
+        first_peak(n) = max(max(img_first(5:7, 5:7, n),[],2),[],1);
+    end
     %offpeak(n) = mean([images_db(5,5,n), images_db(7,5,n), images_db(7,7,n), images_db(5,7,n)]);
-    meanpeak(n) = images_db(6, 6, n);
+    %meanpeak(n) = images_db(6, 6, n);
     all_dyn(n) = (meanpeak(n)-offpeak(n))/meanpeak(n);
 end
 all_dyn(all_dyn < 0) = NaN;
@@ -123,57 +136,59 @@ for r = 1:length(ranks)
     errors(r) = gof(r).rsquare;
     clear top_imgs fitobject taken top_imgs
 end
-semilogx(ranks, fwhm, 'k'); hold on;
+%semilogx(ranks, fwhm, 'k'); hold on;
 %semilogx(ranks, errors, 'r');
 
 [first_mean, firstsem, mean_first] = imgreduce(img_first);
     first_sn = nanmean(MCdat(first_idx));
 [sec_mean, secsem, mean_sec] = imgreduce(img_second);
     sec_sn = nanmean(MCdat(sec_idx));
-[third_mean, thirdsem, mean_third] = imgreduce(img_third);
-    third_sn = nanmean(MCdat(third_idx));
-[four_mean, foursem, mean_four] = imgreduce(img_four);
-    fourth_sn = nanmean(MCdat(fourth_idx));
-[fifth_mean, fivesem, mean_five] = imgreduce(img_five);
-    fifth_sn = nanmean(MCdat(fifth_idx));
-[six_mean, sixsem, mean_six] = imgreduce(img_six);
-    six_sn = nanmean(MCdat(sixth_idx));
+% [third_mean, thirdsem, mean_third] = imgreduce(img_third);
+%     third_sn = nanmean(MCdat(third_idx));
+% [four_mean, foursem, mean_four] = imgreduce(img_four);
+%     fourth_sn = nanmean(MCdat(fourth_idx));
+% [fifth_mean, fivesem, mean_five] = imgreduce(img_five);
+%     fifth_sn = nanmean(MCdat(fifth_idx));
+% [six_mean, sixsem, mean_six] = imgreduce(img_six);
+%     six_sn = nanmean(MCdat(sixth_idx));
 [last_mean, lastsem, mean_last] = imgreduce(img_last);
     last_sn = nanmean(MCdat(last_idx));
 [stable_mean, stablesem, mean_stable] = imgreduce(img_stable);
 [all_mean, allsem, mean_all] = imgreduce(images);
 
-plot([first_mean(6), sec_mean(6), third_mean(6), four_mean(6), fifth_mean(6),...
-    six_mean(6), stable_mean(6)]);
+% plot([first_mean(6), sec_mean(6), third_mean(6), four_mean(6), fifth_mean(6),...
+%     six_mean(6), stable_mean(6)]);
 
-[first, first_x] = ecdf(squeeze(max(max(img_first,[],2),[],1)));
-[second, second_x] = ecdf(squeeze(max(max(img_second,[],2),[],1)));
-[third, third_x] = ecdf(squeeze(max(max(img_third,[],2),[],1)));
-[fourth, fourth_x] = ecdf(squeeze(max(max(img_four,[],2),[],1)));
-[fifth, fifth_x] = ecdf(squeeze(max(max(img_five,[],2),[],1)));
-[sixth, sixth_x] = ecdf(squeeze(max(max(img_six,[],2),[],1)));
-[last, last_x] = ecdf(squeeze(max(max(img_last,[],2),[],1)));
-[stable, stable_x] = ecdf(squeeze(max(max(img_stable,[],2),[],1)));
+% [first, first_x] = ecdf(squeeze(max(max(img_first,[],2),[],1)));
+% [second, second_x] = ecdf(squeeze(max(max(img_second,[],2),[],1)));
+% [third, third_x] = ecdf(squeeze(max(max(img_third,[],2),[],1)));
+% [fourth, fourth_x] = ecdf(squeeze(max(max(img_four,[],2),[],1)));
+% [fifth, fifth_x] = ecdf(squeeze(max(max(img_five,[],2),[],1)));
+% [sixth, sixth_x] = ecdf(squeeze(max(max(img_six,[],2),[],1)));
+% [last, last_x] = ecdf(squeeze(max(max(img_last,[],2),[],1)));
+% [stable, stable_x] = ecdf(squeeze(max(max(img_stable,[],2),[],1)));
 % plot(first, 'color', plotcolors(1,:)); hold on;
 % plot(second, 'color', plotcolors(2,:)); hold on;
 % plot(third, 'color', plotcolors(3,:)); hold on;
 % plot(fourth, 'color', plotcolors(4,:)); hold on;
 % plot(fifth, 'color', plotcolors(5,:)); hold on;
 % plot(sixth, 'color', plotcolors(6,:)); hold on;
-plot(first_x, first, 'color', plotcolors(1,:)); hold on;
-%plot(second_x, second, 'color', plotcolors(2,:)); hold on;
-plot(third_x, third, 'color', plotcolors(3,:)); hold on; 
-plot(last_x, last, 'color', plotcolors(4,:)); hold on; 
-plot(stable_x, stable, 'color', plotcolors(5,:)); hold on; 
+% plot(first_x, first, 'color', plotcolors(1,:)); hold on;
+% plot(second_x, second, 'color', plotcolors(2,:)); hold on;
+% plot(third_x, third, 'color', plotcolors(3,:)); hold on; 
+% plot(last_x, last, 'color', plotcolors(4,:)); hold on; 
+% plot(stable_x, stable, 'color', plotcolors(5,:)); hold on; 
 
-xlim([0 255]); 
-% figure; errorbar(first_mean,firstsem, 'color', plotcolors(1,:));hold on;
-% errorbar(sec_mean,secsem, 'color', plotcolors(2,:));
+%xlim([0 255]); 
+ %figure; errorbar(first_mean,firstsem, 'color', plotcolors(1,:));hold on;
+ %errorbar(sec_mean,secsem, 'color', plotcolors(2,:));
 % errorbar(third_mean,thirdsem, 'color', plotcolors(3,:));
 % errorbar(four_mean,foursem, 'color', plotcolors(4,:));
-% errorbar(last_mean,lastsem, 'color', plotcolors(5,:));hold on;
-% errorbar(stable_mean,stablesem, 'color', plotcolors(6,:));hold on;
+ %errorbar(last_mean,lastsem, 'color', plotcolors(5,:));hold on;
+ %errorbar(stable_mean,stablesem, 'color', plotcolors(6,:));hold on;
 
-figure; imagesc(mean_first, [0 120]);
-figure; imagesc(mean_last, [0 120]);
-figure; imagesc(mean_stable, [0 120]);
+%figure; imagesc(mean_first, [0 120]);
+%figure; imagesc(mean_last, [0 120]);
+%figure; imagesc(mean_stable, [0 120]);
+
+end

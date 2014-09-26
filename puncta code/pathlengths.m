@@ -1,4 +1,4 @@
-function [length] = pathlengths(allpuncta)
+function [length, theta] = pathlengths(allpuncta)
 
 length = [];
 j=1;
@@ -12,6 +12,7 @@ for n = 1:size(allpuncta,2)
             ytrajend = allpuncta(n).trajectory(i).y(k);
             leny = ytrajstart-ytrajend;
             length(j) = sqrt((lenx^2)+(leny^2));
+            theta(j) = atan(lenx)+atan(leny);
             j = j+1;
         end
     end
