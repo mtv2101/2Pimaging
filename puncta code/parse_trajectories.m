@@ -2,26 +2,17 @@ clear all;
 
 warning('off','all');
 
-rootdirs = {'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\ALLMC\',...
-    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\MCenriched\',...
-     'C:\Users\supersub\Desktop\Data\text files\0.5cutoff 8disp\MC\'};%,...
-%     'C:\Users\supersub\Desktop\Data\text files\0.7cutoff 8disp\all_latden\',...
+rootdirs = {'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\all_latden\',...
+    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\10min_control\'};%,...
+%     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\MCenriched\',...
+%     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\10min_control\'};%,...
 %     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\all_latden\',...
-%     'C:\Users\supersub\Desktop\Data\text files\2cutoff 8disp\all_latden\',...
-%     'C:\Users\supersub\Desktop\Data\text files\5cutoff 8disp\all_latden\'};%...
-%     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\MCenriched\'};%,...
-%      'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\ALLTC\',...
-%      'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\TC\',...
-%      'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\TCenriched\',...
-%     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\10min_control\'};
-days = [1:4; 5:8; 5:8];%; 1:4; 5:8]; % days to analyze, lengths must be the same
-groupnames = {'ALLMC' 'MCenr' 'MCctl'};% 'TCb' 'TCe' 'GLb' 'GLe'};% 'TCall' 'TCnon' 'TCenr' '10min'}; %these names must contain the same number of characters
-%{'ALLMCbse' 'MCnonenr' 'MClast_4' 'ALLTCbse' 'TCnonenr' 'TClast_4' ' control'};
-control_group = 7; % which rootdir contains the control data
 
-% plotcolors = {'k', 'r', 'b'};
-%plotcolors = [31 119 180; 255 127 14; 44 160 44; 214 39 40; 148 103 189; 140 86 75;...
-    %227 119 194]./255;%; 127 127 127; 188 189 34; 23 190 207]./255); % Tableau 10 Palette, reverse order
+days = [1:5; 1:5];%; 1:4; 5:8]; % days to analyze, lengths must be the same
+groupnames = {'ALL' 'crl'}; %these names must contain the same number of characters
+control_group = 4; % which rootdir contains the control data
+
+% Tableau 10 color Palette
 blue = [31 119 180]./255;
 orange = [255 127 14]./255;
 green = [44 160 44]./255;
@@ -36,8 +27,9 @@ plotcolors = [blue; orange; red; purple; green; brown; teal];
 start_slope = 1; %day on which to start slope calculation.  Choose 2 to avoid day1-2 nonlinearity
 
 % Choose plots
-PLOT_ALLLIFETIME = 0;
+PUNCTA_PEAKS = 0;
 PLOT_CUMLIFE = 0;
+PUNCTA_DAYS = 1;
 PLOT_PERSIST_PUNCTA = 0;
 PLOT_NLDAYS = 0;
 PLOT_NLRATIO = 0;
@@ -50,7 +42,6 @@ for n = 1:length(rootdirs)
     for k = roi
         all_pp{k,n} = condition(n).allpuncta(k).percent_persistant;
         pp = condition(n).allpuncta(k).percent_persistant;
-        if PLOT_ALLLIFETIME == 1
             lifetimeplot(roi_it,n) = plot(pp(1:end), 'Color', plotcolors(n,:)); ylim([0 1]); hold on;
             title(['Trajectory lifetimes over day ' mat2str(days(n,:))]);
             fitx = start_slope:(length(pp));
@@ -58,7 +49,6 @@ for n = 1:length(rootdirs)
             condition(n).allpuncta(k).fitcoeffs = polyfit(fitx, fity, 1); %linear fit
             stats(n).slopes(roi_it) = condition(n).allpuncta(k).fitcoeffs(1);
             roi_it = roi_it+1; %because some rois dont exist in the time window, "roi" specifies which ones are valid.
-        end
     end
     [condition(n).length, condition(n).theta] = pathlengths(condition(n).allpuncta); %function pathlengths
     clear all_lifetimes
@@ -90,18 +80,44 @@ end
 
 % get puncta images analysis values
 for n = 1:length(rootdirs)
-   [img_dat(n).maxpeak, img_dat(n).last_peak, img_dat(n).first_peak,...
-        img_dat(n).stable_peak] = analyze_punctaimages(condition(n).allpuncta);
+   [img_perday(n,:), img_dat(n).mean_peak, img_dat(n).max_peak, img_dat(n).last_peak,...
+       img_dat(n).first_peak, img_dat(n).stable_peak]...
+       = analyze_punctaimages(condition(n).allpuncta);
 end
         
 %%%% plotting %%%%
 % plot image peak ecdf
-for n = 1:length(rootdirs)
-    h = cdfplot(img_dat(n).maxpeak); hold on;
-    set(h,'Color',plotcolors(n,:));
-    xlim([0 255]);
+if PUNCTA_PEAKS == 1
+    figure;
+    for n = 1:length(rootdirs)
+        [f{n}, x{n}] = ecdf(img_dat(n).mean_peak);
+        plot(x{n}, f{n}, 'color',  plotcolors(n,:)); hold on;
+        xlim([0 255]);
+    end
 end
 
+% plot intensity over days for each group
+if PUNCTA_DAYS == 1
+    for n = 1:length(rootdirs)
+        for d = 1:size(img_perday,2) % for each day
+            for r = 1:size(img_perday(n,d).allimages, 3) % for each roi
+                m(r) = mean(mean(img_perday(n,d).allimages(5:7, 5:7, r),2),1);
+            end
+            if d == 1
+                id_names = repmat(['day ', mat2str(d)], length(m), 1);
+                anova_id = m';
+            else
+                id_names = vertcat(id_names, repmat(['day ', mat2str(d)], length(m), 1));
+                anova_id = vertcat(anova_id, m');
+            end
+            clear m
+        end
+        figure;boxplot(anova_id, id_names, 'color', plotcolors);
+        ylim([0 255]);
+        img_perday(n).anova_id = anova_id;
+        clear anova_id id_names
+    end
+end
 
 %plot all trajectory lengths
 if PLOT_CUMLIFE == 1

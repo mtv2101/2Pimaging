@@ -1,24 +1,39 @@
-function [maxpeak, last_peak, first_peak, stable_peak] = analyze_punctaimages(dat)
+function [img_perday, mean_peak, max_peak, last_peak, first_peak, stable_peak] = analyze_punctaimages(dat)
 
 %dat = condition(1).allpuncta;
 
 plotcolors = [31 119 180; 255 127 14; 44 160 44; 214 39 40; 148 103 189; 140 86 75;...
     227 119 194]./255;
 
-% get all images
-%lifetimes = [];
+% get all images of puncta in a trajectory
 i=1;
 for n = 1:size(dat,2); % for each roi
     %lifetimes = cat(2, lifetimes, dat(n).trajectory.lifetime);
-    for m = 1:size(dat(n).allimg, 2)
-        for k = 1:size(dat(n).allimg(m).img, 3)
-            if isempty(dat(n).allimg(m).img(:,:,k)) == 1
+    for m = 1:size(dat(n).trajimg, 2)
+        for k = 1:size(dat(n).trajimg(m).img, 3)
+            if isempty(dat(n).trajimg(m).img(:,:,k)) == 1
                 continue
             end
-            images(:,:,i) = dat(n).allimg(m).img(:,:,k);
+            images(:,:,i) = dat(n).trajimg(m).img(:,:,k);
             i=i+1;
         end
     end
+end
+
+% get all images by day
+for d = 1:length(dat(n).allimg) % for each day
+    allimages = [];
+    for n = 1:size(dat,2) %for each roi
+        if ~isempty(dat(n).allimg) && (length(dat(n).allimg) >= d) %if data exists or that day
+            for p = 1:size(dat(n).allimg(d).img,3)  %for each puncta
+                ii(:,:,p) = dat(n).allimg(d).img(:,:,p);
+            end
+            allimages = cat(3, allimages, ii);
+            clear ii
+        end
+    end
+    img_perday(d).allimages = allimages;
+    clear allimages
 end
 
 % get first and last puncta
@@ -29,47 +44,47 @@ img_four = []; fourth_idx = logical(zeros(1,size(images, 3)));
 img_five = []; fifth_idx = logical(zeros(1,size(images, 3)));
 img_six = []; sixth_idx = logical(zeros(1,size(images, 3)));
 img_last = []; last_idx = logical(zeros(1,size(images, 3)));
-img_stable = []; 
+img_stable = [];
 i = 1;
 for n = 1:size(dat,2);
     %lifetimes = cat(2, lifetimes, dat(n).trajectory.lifetime);
-    for m = 1:size(dat(n).allimg, 2)
-        for k = 1:size(dat(n).allimg(m).img, 3) %for each day
-            if isempty(dat(n).allimg(m).img(:,:,k)) == 1 %if image is filled with NaNs becuase it crosses fov border
-            	continue
+    for m = 1:size(dat(n).trajimg, 2)
+        for k = 1:size(dat(n).trajimg(m).img, 3) %for each day
+            if isempty(dat(n).trajimg(m).img(:,:,k)) == 1 %if image is filled with NaNs becuase it crosses fov border
+                continue
             end
             if dat(n).trajectory(m).new(k) == 1
-                img_first = cat(3, img_first, dat(n).allimg(m).img(:,:,k)); 
+                img_first = cat(3, img_first, dat(n).trajimg(m).img(:,:,k));
                 first_idx(i) = 1;
-                if size(dat(n).allimg(m).img,3) >= k+1 % if there is a puncta after the first
-                    img_second = cat(3, img_second, dat(n).allimg(m).img(:,:,k+1)); 
+                if size(dat(n).trajimg(m).img,3) >= k+1 % if there is a puncta after the first
+                    img_second = cat(3, img_second, dat(n).trajimg(m).img(:,:,k+1));
                     sec_idx(i) = 1;
                 end
-                if size(dat(n).allimg(m).img,3) >= k+2 % if there is a puncta after the first
-                    img_third = cat(3, img_third, dat(n).allimg(m).img(:,:,k+2)); %third obseravtion of puncta
+                if size(dat(n).trajimg(m).img,3) >= k+2 % if there is a puncta after the first
+                    img_third = cat(3, img_third, dat(n).trajimg(m).img(:,:,k+2)); %third obseravtion of puncta
                     third_idx(i) = 1;
                 end
-                if size(dat(n).allimg(m).img,3) >= k+3 % if there is a puncta after the first
-                    img_four = cat(3, img_four, dat(n).allimg(m).img(:,:,k+3)); %third obseravtion of puncta
+                if size(dat(n).trajimg(m).img,3) >= k+3 % if there is a puncta after the first
+                    img_four = cat(3, img_four, dat(n).trajimg(m).img(:,:,k+3)); %third obseravtion of puncta
                     fourth_idx(i) = 1;
                 end
-                if size(dat(n).allimg(m).img,3) >= k+4 % if there is a puncta after the first
-                    img_five = cat(3, img_five, dat(n).allimg(m).img(:,:,k+4)); %third obseravtion of puncta
+                if size(dat(n).trajimg(m).img,3) >= k+4 % if there is a puncta after the first
+                    img_five = cat(3, img_five, dat(n).trajimg(m).img(:,:,k+4)); %third obseravtion of puncta
                     fifth_idx(i) = 1;
                 end
-                if size(dat(n).allimg(m).img,3) >= k+5 % if there is a puncta after the first
-                    img_six = cat(3, img_six, dat(n).allimg(m).img(:,:,k+5)); %third obseravtion of puncta
+                if size(dat(n).trajimg(m).img,3) >= k+5 % if there is a puncta after the first
+                    img_six = cat(3, img_six, dat(n).trajimg(m).img(:,:,k+5)); %third obseravtion of puncta
                     sixth_idx(i) = 1;
                 end
             end
             if dat(n).trajectory(m).lost(k) == 1
-                img_last = cat(3, img_last, dat(n).allimg(m).img(:,:,end));
+                img_last = cat(3, img_last, dat(n).trajimg(m).img(:,:,end));
                 last_idx(i) = 1;
-            end    
+            end
             i = i+1;
         end
         if dat(n).trajectory(m).lifetime == length(dat(n).percent_persistant) %if the puncta lives the whole obseravtion
-            img_temp = mean(dat(n).allimg(m).img, 3);
+            img_temp = mean(dat(n).trajimg(m).img, 3);
             img_stable = cat(3, img_stable, img_temp);
         end
     end
@@ -103,20 +118,20 @@ ranks = [.5, 1, 2, 3, 5, 10, 20, 30, 50, 70, 90]; % ranks to extract, in %, pseu
 
 for n = 1:size(images,3)
     offpeak(n) = mean([images_db(4,4,n), images_db(8,4,n), images_db(8,8,n), images_db(4,8,n)]);
-    meanpeak(n) = mean(mean(images_db(5:7, 5:7, n)));
-    maxpeak(n) = max(max(images_db(5:7, 5:7, n),[],2),[],1);
+    mean_peak(n) = mean(mean(images_db(5:7, 5:7, n)));
+    max_peak(n) = max(max(images_db(5:7, 5:7, n),[],2),[],1);
     if n<=size(img_last,3)
-        last_peak(n) = max(max(img_last(5:7, 5:7, n),[],2),[],1);
+        last_peak(n) = mean(mean(img_last(5:7, 5:7, n),2),1);
     end
     if n<=size(img_stable,3)
-        stable_peak(n) = max(max(img_stable(5:7, 5:7, n),[],2),[],1);
+        stable_peak(n) = mean(mean(img_stable(5:7, 5:7, n),2),1);
     end
     if n<=size(img_first,3)
-        first_peak(n) = max(max(img_first(5:7, 5:7, n),[],2),[],1);
+        first_peak(n) = mean(mean(img_first(5:7, 5:7, n),2),1);
     end
     %offpeak(n) = mean([images_db(5,5,n), images_db(7,5,n), images_db(7,7,n), images_db(5,7,n)]);
-    %meanpeak(n) = images_db(6, 6, n);
-    all_dyn(n) = (meanpeak(n)-offpeak(n))/meanpeak(n);
+    %mean_peak(n) = images_db(6, 6, n);
+    all_dyn(n) = (mean_peak(n)-offpeak(n))/mean_peak(n);
 end
 all_dyn(all_dyn < 0) = NaN;
 include_imgs = find(isfinite(all_dyn));
@@ -140,9 +155,9 @@ end
 %semilogx(ranks, errors, 'r');
 
 [first_mean, firstsem, mean_first] = imgreduce(img_first);
-    first_sn = nanmean(MCdat(first_idx));
+first_sn = nanmean(MCdat(first_idx));
 [sec_mean, secsem, mean_sec] = imgreduce(img_second);
-    sec_sn = nanmean(MCdat(sec_idx));
+sec_sn = nanmean(MCdat(sec_idx));
 % [third_mean, thirdsem, mean_third] = imgreduce(img_third);
 %     third_sn = nanmean(MCdat(third_idx));
 % [four_mean, foursem, mean_four] = imgreduce(img_four);
@@ -152,7 +167,7 @@ end
 % [six_mean, sixsem, mean_six] = imgreduce(img_six);
 %     six_sn = nanmean(MCdat(sixth_idx));
 [last_mean, lastsem, mean_last] = imgreduce(img_last);
-    last_sn = nanmean(MCdat(last_idx));
+last_sn = nanmean(MCdat(last_idx));
 [stable_mean, stablesem, mean_stable] = imgreduce(img_stable);
 [all_mean, allsem, mean_all] = imgreduce(images);
 
@@ -175,17 +190,17 @@ end
 % plot(sixth, 'color', plotcolors(6,:)); hold on;
 % plot(first_x, first, 'color', plotcolors(1,:)); hold on;
 % plot(second_x, second, 'color', plotcolors(2,:)); hold on;
-% plot(third_x, third, 'color', plotcolors(3,:)); hold on; 
-% plot(last_x, last, 'color', plotcolors(4,:)); hold on; 
-% plot(stable_x, stable, 'color', plotcolors(5,:)); hold on; 
+% plot(third_x, third, 'color', plotcolors(3,:)); hold on;
+% plot(last_x, last, 'color', plotcolors(4,:)); hold on;
+% plot(stable_x, stable, 'color', plotcolors(5,:)); hold on;
 
-%xlim([0 255]); 
- %figure; errorbar(first_mean,firstsem, 'color', plotcolors(1,:));hold on;
- %errorbar(sec_mean,secsem, 'color', plotcolors(2,:));
+%xlim([0 255]);
+%figure; errorbar(first_mean,firstsem, 'color', plotcolors(1,:));hold on;
+%errorbar(sec_mean,secsem, 'color', plotcolors(2,:));
 % errorbar(third_mean,thirdsem, 'color', plotcolors(3,:));
 % errorbar(four_mean,foursem, 'color', plotcolors(4,:));
- %errorbar(last_mean,lastsem, 'color', plotcolors(5,:));hold on;
- %errorbar(stable_mean,stablesem, 'color', plotcolors(6,:));hold on;
+%errorbar(last_mean,lastsem, 'color', plotcolors(5,:));hold on;
+%errorbar(stable_mean,stablesem, 'color', plotcolors(6,:));hold on;
 
 %figure; imagesc(mean_first, [0 120]);
 %figure; imagesc(mean_last, [0 120]);

@@ -118,22 +118,38 @@ for k = 1:roi %for each text file of maxima
     sum_total_particles = sum(total_particles(day_index(1):day_index(end)));
     num_singles = sum(sum(issolo));
     
-    % find average image around each trajectory puncta
+    % find image around each trajectory puncta
     for n = 1:length(trajectory)
-        img = zeros(11);
         for m = 1:length(trajectory(n).fr_intsect) %for lifetime of trajectory
-            xrange = ceil([(trajectory(n).x(m)-isize):(trajectory(n).x(m)+isize)]);
-            yrange = ceil([(trajectory(n).y(m)-isize):(trajectory(n).y(m)+isize)]);
-            if min(xrange) <= 0 || min(yrange) <= 0 || ...
-                    max(xrange)+isize > size(image,1) || ...
-                    max(yrange)+isize > size(image,2)
-                allpuncta(k).allimg(n).img(:,:,m) = NaN((isize*2)+1); % fill image with NaNs if it crosses FOV border
+            xrange_t = ceil([(trajectory(n).x(m)-isize):(trajectory(n).x(m)+isize)]); %range for trajectory images
+            yrange_t = ceil([(trajectory(n).y(m)-isize):(trajectory(n).y(m)+isize)]); %range for trajectory images
+            if min(xrange_t) <= 0 || min(yrange_t) <= 0 || ...
+                    max(xrange_t)+isize > size(image,1) || ...
+                    max(yrange_t)+isize > size(image,2)
+                allpuncta(k).trajimg(n).img(:,:,m) = NaN((isize*2)+1); % fill image with NaNs if it crosses FOV border
                 continue
             end
-            allpuncta(k).allimg(n).img(:,:,m) = image(xrange,yrange,trajectory(n).fr_intsect(m)); %get the frame with the puncta
+            allpuncta(k).trajimg(n).img(:,:,m) = image(xrange_t,yrange_t,trajectory(n).fr_intsect(m)); %get the frame with the puncta
         end
     end
     
+    % find image around each puncta (including solo puncta)
+    for d = 1:length(day_index)
+        for n = 1:length(all_coords{1,d}) %for each puncta
+            xcord = str2double(all_coords{1,d}{n,1});
+            ycord = str2double(all_coords{2,d}{n,1});
+            xcord_rng = ceil([(xcord-isize):(xcord+isize)]);
+            ycord_rng = ceil([(ycord-isize):(ycord+isize)]);
+            if min(xcord_rng) <= 0 || min(ycord_rng) <= 0 || ...
+                    max(xcord_rng)+isize > size(image,1) || ...
+                    max(ycord_rng)+isize > size(image,2)
+                allpuncta(k).allimg(d).img(:,:,n) = NaN((isize*2)+1); % fill image with NaNs if it crosses FOV border
+                continue
+            end
+            allpuncta(k).allimg(d).img(:,:,n) = image(xcord_rng, ycord_rng, day_index(d));
+        end
+    end
+            
     %%%%% calculate percentage of puncta that persist from day 1 to day d
     for d = 1:length(day_index)
         persist = zeros(length(trajectory),1);
@@ -201,7 +217,7 @@ for k = 1:roi %for each text file of maxima
     allpuncta(k).percent_persistant = percent_persistant;
     allpuncta(k).new = sum_all_new;
     allpuncta(k).lost = sum_all_lost;
-    allpuncta(k).allcoords = all_coords;
+    allpuncta(k).all_coords = all_coords;
     allpuncta(k).issolo = issolo;
     
     roi_valid(k) = k;
