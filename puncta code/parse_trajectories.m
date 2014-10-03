@@ -8,7 +8,7 @@ rootdirs = {'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\all_latden\
 %     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\10min_control\'};%,...
 %     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\all_latden\',...
 
-days = [1:5; 1:5];%; 1:4; 5:8]; % days to analyze, lengths must be the same
+days = [1:8; 1:8];%; 1:4; 5:8]; % days to analyze, lengths must be the same
 groupnames = {'ALL' 'crl'}; %these names must contain the same number of characters
 control_group = 4; % which rootdir contains the control data
 
@@ -27,10 +27,11 @@ plotcolors = [blue; orange; red; purple; green; brown; teal];
 start_slope = 1; %day on which to start slope calculation.  Choose 2 to avoid day1-2 nonlinearity
 
 % Choose plots
+PLOT_LIFETIMES = 1;
 PUNCTA_PEAKS = 0;
 PLOT_CUMLIFE = 0;
-PUNCTA_DAYS = 1;
-PLOT_PERSIST_PUNCTA = 0;
+PUNCTA_DAYS = 0;
+PLOT_PERSIST_PUNCTA = 1;
 PLOT_NLDAYS = 0;
 PLOT_NLRATIO = 0;
 PLOT_SINGLES = 0;
@@ -42,13 +43,15 @@ for n = 1:length(rootdirs)
     for k = roi
         all_pp{k,n} = condition(n).allpuncta(k).percent_persistant;
         pp = condition(n).allpuncta(k).percent_persistant;
+        if PLOT_LIFETIMES == 1
             lifetimeplot(roi_it,n) = plot(pp(1:end), 'Color', plotcolors(n,:)); ylim([0 1]); hold on;
             title(['Trajectory lifetimes over day ' mat2str(days(n,:))]);
-            fitx = start_slope:(length(pp));
-            fity = pp(start_slope:end);
-            condition(n).allpuncta(k).fitcoeffs = polyfit(fitx, fity, 1); %linear fit
-            stats(n).slopes(roi_it) = condition(n).allpuncta(k).fitcoeffs(1);
-            roi_it = roi_it+1; %because some rois dont exist in the time window, "roi" specifies which ones are valid.
+        end
+        fitx = start_slope:(length(pp));
+        fity = pp(start_slope:end);
+        condition(n).allpuncta(k).fitcoeffs = polyfit(fitx, fity, 1); %linear fit
+        stats(n).slopes(roi_it) = condition(n).allpuncta(k).fitcoeffs(1);
+        roi_it = roi_it+1; %because some rois dont exist in the time window, "roi" specifies which ones are valid.
     end
     [condition(n).length, condition(n).theta] = pathlengths(condition(n).allpuncta); %function pathlengths
     clear all_lifetimes
@@ -80,12 +83,35 @@ end
 
 % get puncta images analysis values
 for n = 1:length(rootdirs)
-   [img_perday(n,:), img_dat(n).mean_peak, img_dat(n).max_peak, img_dat(n).last_peak,...
+   [img_dat(n).img_perday, img_dat(n).mean_peak, img_dat(n).max_peak, img_dat(n).last_peak,...
        img_dat(n).first_peak, img_dat(n).stable_peak]...
        = analyze_punctaimages(condition(n).allpuncta);
 end
         
 %%%% plotting %%%%
+
+% plot puncta brightness trends over lifetime
+blech = fieldnames(img_dat);
+blech_names = {'first_peak'; 'last_peak '; 'stable_pek'; 'mean_peak '};
+blech_idx = [5, 4, 6, 2]; % index of where these data occur in "img_dat"
+for n = 1:length(rootdirs)
+    figure;
+    for b = 1:length(blech_idx)
+        idx = blech_idx(b);
+        if b == 1
+            names_punctlifeimg = repmat(blech_names{b}, length(img_dat(n).(blech{idx})), 1);
+            anova_punctlifeimg = img_dat(n).(blech{idx})';
+        else
+            names_punctlifeimg = vertcat(names_punctlifeimg, repmat(blech_names{b}, length(img_dat(n).(blech{idx})), 1));
+            anova_punctlifeimg = vertcat(anova_punctlifeimg, img_dat(n).(blech{idx})');
+        end
+    end
+    [pli_p, pli_table, pli_stats] = anova1(anova_punctlifeimg, names_punctlifeimg, 'color', plotcolors);
+    ylim([0 255]);
+    multcompare(pli_stats);
+    clear anova_punctlifeimg names_punctlifeimg
+end
+
 % plot image peak ecdf
 if PUNCTA_PEAKS == 1
     figure;
@@ -99,9 +125,10 @@ end
 % plot intensity over days for each group
 if PUNCTA_DAYS == 1
     for n = 1:length(rootdirs)
-        for d = 1:size(img_perday,2) % for each day
-            for r = 1:size(img_perday(n,d).allimages, 3) % for each roi
-                m(r) = mean(mean(img_perday(n,d).allimages(5:7, 5:7, r),2),1);
+        img_perday = img_dat(n).img_perday;
+        for d = 1:size(img_perday,2) % for each day            
+            for r = 1:size(img_perday(d).allimages, 3) % for each roi
+                m(r) = mean(mean(img_perday(d).allimages(5:7, 5:7, r),2),1);
             end
             if d == 1
                 id_names = repmat(['day ', mat2str(d)], length(m), 1);
@@ -114,8 +141,8 @@ if PUNCTA_DAYS == 1
         end
         figure;boxplot(anova_id, id_names, 'color', plotcolors);
         ylim([0 255]);
-        img_perday(n).anova_id = anova_id;
-        clear anova_id id_names
+        %img_perday(n).anova_id = anova_id;
+        clear anova_id id_names img_perday
     end
 end
 

@@ -1,10 +1,11 @@
-%This code written by Matt Valley will fill blank data as NaN
-%gathered after FIJI registratrion and ROI generation.
-%waves from each roi done in FIJI must be saves with filename
-%containing "wave_block" so that it loads correctly
+%written by Matt Valley, 2014
+% This code will fill blank data as NaN
+% gathered after FIJI registratrion and ROI generation.
+% waves from each roi done in FIJI must be saved with filename
+% containing "wave_block" so that it loads correctly
 
-%2014-07-07 Kurt modified line 25 to allow loading wave .txt tab delimited files
-%instead of needing to first convert to a .mat file.
+% 2014-07-07 Kurt modified line 25 to allow loading wave .txt tab delimited files
+% instead of needing to first convert to a .mat file.
 
 % This code does 4 things:
 % 1. It reformats the data from [frames, rois] to [trials, frames, rois]
@@ -32,7 +33,7 @@ for x = 1:length(ALLBLOCKS) %for each block
         for t = 1:length(ALLBLOCKS(x).imgindx) %for each trial in the block
             for i = 1:length(ALLBLOCKS(x).imgindx{t}) %for each image in the trial
                 if length(ALLBLOCKS(x).imgindx) * length(ALLBLOCKS(x).imgindx{t}) ~= length(ALLBLOCKS(x).include)
-                    fprintf 'ERROR! FIX THE DAMN CODE MATT '
+                    fprintf 'ERROR! FIX THE DAMN CODE MATT!!!'
                     indx=indx+1;
                     break
                 end

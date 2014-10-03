@@ -12,7 +12,7 @@ for n = 1:size(allpuncta,2)
             ytrajend = allpuncta(n).trajectory(i).y(k);
             leny = ytrajstart-ytrajend;
             length(j) = sqrt((lenx^2)+(leny^2));
-            theta(j) = atan(lenx)+atan(leny);
+            theta(j) = atan(leny/lenx);
             j = j+1;
         end
     end

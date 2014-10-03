@@ -5,6 +5,7 @@ function [ALLDAYS] =  parse_odors_behaviors(ALLBLOCKS, behaviors, odor1, odor2, 
 % also OdONFrameIndx removed since valve timing has been corrected - Kurt
 %
 % 
+% to do:
 % figure out repeated measures errors
 
 BLOCKS = 1:length(ALLBLOCKS);

@@ -171,7 +171,8 @@ for k = 1:roi %for each text file of maxima
     hastraj = zeros(length(trajectory), length(day_index));
     for n = 1:length(trajectory)
         for d = 1:length(trajectory(n).framesobs)
-            [val, idx, blah] = intersect(day_index, trajectory(n).framesobs(d));
+            idx = length(day_index(day_index <= trajectory(n).framesobs(d))); %faster way to find matching index
+            %[val, idx, blah] = intersect(day_index, trajectory(n).framesobs(d)); %slower way to find matching index
             hastraj(n,idx) = 1;
         end
     end
