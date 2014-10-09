@@ -1,4 +1,5 @@
-function [img_perday, mean_peak, max_peak, last_peak, first_peak, stable_peak] = analyze_punctaimages(dat)
+function [img_perday, mean_peak, max_peak, last_peak, first_peak, second_peak,...
+    third_peak, fourth_peak, stable_peak] = analyze_punctaimages(dat)
 
 %dat = condition(1).allpuncta;
 
@@ -53,27 +54,27 @@ for n = 1:size(dat,2);
             if isempty(dat(n).trajimg(m).img(:,:,k)) == 1 %if image is filled with NaNs becuase it crosses fov border
                 continue
             end
-            if dat(n).trajectory(m).new(k) == 1
+            if dat(n).trajectory(m).new(k) == 1 %if there is a new puncta
                 img_first = cat(3, img_first, dat(n).trajimg(m).img(:,:,k));
                 first_idx(i) = 1;
                 if size(dat(n).trajimg(m).img,3) >= k+1 % if there is a puncta after the first
                     img_second = cat(3, img_second, dat(n).trajimg(m).img(:,:,k+1));
                     sec_idx(i) = 1;
                 end
-                if size(dat(n).trajimg(m).img,3) >= k+2 % if there is a puncta after the first
+                if size(dat(n).trajimg(m).img,3) >= k+2 % if there is a puncta after the second
                     img_third = cat(3, img_third, dat(n).trajimg(m).img(:,:,k+2)); %third obseravtion of puncta
                     third_idx(i) = 1;
                 end
-                if size(dat(n).trajimg(m).img,3) >= k+3 % if there is a puncta after the first
-                    img_four = cat(3, img_four, dat(n).trajimg(m).img(:,:,k+3)); %third obseravtion of puncta
+                if size(dat(n).trajimg(m).img,3) >= k+3 % if there is a puncta after the ...
+                    img_four = cat(3, img_four, dat(n).trajimg(m).img(:,:,k+3)); 
                     fourth_idx(i) = 1;
                 end
-                if size(dat(n).trajimg(m).img,3) >= k+4 % if there is a puncta after the first
-                    img_five = cat(3, img_five, dat(n).trajimg(m).img(:,:,k+4)); %third obseravtion of puncta
+                if size(dat(n).trajimg(m).img,3) >= k+4 % if there is a puncta after the ...
+                    img_five = cat(3, img_five, dat(n).trajimg(m).img(:,:,k+4)); 
                     fifth_idx(i) = 1;
                 end
-                if size(dat(n).trajimg(m).img,3) >= k+5 % if there is a puncta after the first
-                    img_six = cat(3, img_six, dat(n).trajimg(m).img(:,:,k+5)); %third obseravtion of puncta
+                if size(dat(n).trajimg(m).img,3) >= k+5 % if there is a puncta after the ...
+                    img_six = cat(3, img_six, dat(n).trajimg(m).img(:,:,k+5)); 
                     sixth_idx(i) = 1;
                 end
             end
@@ -129,6 +130,15 @@ for n = 1:size(images,3)
     if n<=size(img_first,3)
         first_peak(n) = mean(mean(img_first(5:7, 5:7, n),2),1);
     end
+    if n<=size(img_second,3)
+        second_peak(n) = mean(mean(img_second(5:7, 5:7, n),2),1);
+    end
+    if n<=size(img_third,3)
+        third_peak(n) = mean(mean(img_third(5:7, 5:7, n),2),1);
+    end
+    if n<=size(img_four,3)
+        fourth_peak(n) = mean(mean(img_four(5:7, 5:7, n),2),1);
+    end
     %offpeak(n) = mean([images_db(5,5,n), images_db(7,5,n), images_db(7,7,n), images_db(5,7,n)]);
     %mean_peak(n) = images_db(6, 6, n);
     all_dyn(n) = (mean_peak(n)-offpeak(n))/mean_peak(n);
@@ -137,20 +147,20 @@ all_dyn(all_dyn < 0) = NaN;
 include_imgs = find(isfinite(all_dyn));
 images_finite = images(:,:,include_imgs);
 all_dyn_finite = all_dyn(isfinite(all_dyn));
-[rankedsharp, rank_idx] = sort(all_dyn_finite, 'descend');
-len_dat = length(all_dyn_finite);
-to_take = floor(len_dat*.005); % take 0.5% of data at each interval
-for r = 1:length(ranks)
-    end_take(r) = floor(ranks(r)*len_dat*.01);
-    taken = rank_idx((end_take(r)-to_take+1):end_take(r)); %get 1% data at each rank position
-    top_imgs = images_finite(:,:,taken);
-    [sharp_mean(:,r), sharpsem(:,r), mean_sharp(:,:,r)] = imgreduce(top_imgs);
-    [fitobject, gof(r)] = fit((1:length(sharp_mean(:,r)))', sharp_mean(:,r), 'gauss1');
-    c = coeffvalues(fitobject); c = c(3);
-    fwhm(r) = 2.35482*c*0.182; % conversion from c to fwhm in microns
-    errors(r) = gof(r).rsquare;
-    clear top_imgs fitobject taken top_imgs
-end
+% [rankedsharp, rank_idx] = sort(all_dyn_finite, 'descend');
+% len_dat = length(all_dyn_finite);
+% to_take = floor(len_dat*.005); % take 0.5% of data at each interval
+% for r = 1:length(ranks)
+%     end_take(r) = floor(ranks(r)*len_dat*.01);
+%     taken = rank_idx((end_take(r)-to_take+1):end_take(r)); %get 1% data at each rank position
+%     top_imgs = images_finite(:,:,taken);
+%     [sharp_mean(:,r), sharpsem(:,r), mean_sharp(:,:,r)] = imgreduce(top_imgs);
+%     [fitobject, gof(r)] = fit((1:length(sharp_mean(:,r)))', sharp_mean(:,r), 'gauss1');
+%     c = coeffvalues(fitobject); c = c(3);
+%     fwhm(r) = 2.35482*c*0.182; % conversion from c to fwhm in microns
+%     errors(r) = gof(r).rsquare;
+%     clear top_imgs fitobject taken top_imgs
+% end
 %semilogx(ranks, fwhm, 'k'); hold on;
 %semilogx(ranks, errors, 'r');
 

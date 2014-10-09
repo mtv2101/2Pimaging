@@ -2,14 +2,14 @@ clear all;
 
 warning('off','all');
 
-rootdirs = {'C:\Users\supersub\Desktop\Data\text files\0.5cutoff 8disp\all_latden\',...
-    'C:\Users\supersub\Desktop\Data\text files\0.7cutoff 8disp\all_latden\',...
-     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\all_latden\'};%,...
+rootdirs = {'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\all_latden\',...
+    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\ALLGL\'};%,...
+%     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\MCenriched\',...
 %     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\10min_control\'};%,...
 %     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\all_latden\',...
 
-days = [1:8; 1:8; 1:8];%; 1:4; 5:8]; % days to analyze, lengths must be the same
-groupnames = {'0.7' '1.0' '2.0'}; %these names must contain the same number of characters
+days = [1:8; 1:8];%; 1:4; 5:8]; % days to analyze, lengths must be the same
+groupnames = {'ALLGL14' 'ALLGL58'}; %these names must contain the same number of characters
 control_group = 4; % which rootdir contains the control data
 
 % Tableau 10 color Palette
@@ -27,13 +27,13 @@ plotcolors = [blue; orange; red; purple; green; brown; teal; grey];
 start_slope = 1; %day on which to start slope calculation.  Choose 2 to avoid day1-2 nonlinearity
 
 % Choose plots
-PLOT_PLI = 1; % puncta brightness over lifetime
+PLOT_PLI = 0; % puncta brightness over lifetime
 PLOT_LIFETIMES = 0;
 PUNCTA_PEAKS = 0;
 PLOT_CUMLIFE = 0;
-PUNCTA_DAYS = 0;
+PUNCTA_DAYS = 1;
 PLOT_PERSIST_PUNCTA = 0;
-PLOT_NLDAYS = 0;
+PLOT_NLDAYS = 1;
 PLOT_NLRATIO = 0;
 PLOT_SINGLES = 0;
 PLOT_SLOPES = 0;
@@ -84,40 +84,38 @@ end
 
 % get puncta images analysis values
 for n = 1:length(rootdirs)
-   [img_dat(n).img_perday, img_dat(n).mean_peak, img_dat(n).max_peak,...
-       img_dat(n).last_peak, img_dat(n).first_peak, img_dat(n).second_peak,...
-       img_dat(n).third_peak, img_dat(n).four_peak, img_dat(n).stable_peak]...
+   [img_dat(n).img_perday, img_dat(n).mean_peak, img_dat(n).max_peak, img_dat(n).last_peak,...
+       img_dat(n).first_peak, img_dat(n).stable_peak]...
        = analyze_punctaimages(condition(n).allpuncta);
 end
         
 %%%% plotting %%%%
 
 % plot puncta brightness trends over lifetime
-if PLOT_PLI == 1
-    blech = fieldnames(img_dat);
-    blech_names = {'first_peak'; 'secnd_peak'; 'third_peak'; 'four_peak '; 'last_peak '; 'stablepeak'};
-    blech_idx = [5, 6, 7, 8, 4, 9]; % index of where these data occur in "img_dat"
-    for n = 1:length(rootdirs)
-        figure;
-        for b = 1:length(blech_idx)
-            idx = blech_idx(b);
-            if b == 1
-                names_punctlifeimg = repmat(blech_names{b}, length(img_dat(n).(blech{idx})), 1);
-                anova_punctlifeimg = img_dat(n).(blech{idx})';
-            else
-                names_punctlifeimg = vertcat(names_punctlifeimg, repmat(blech_names{b}, length(img_dat(n).(blech{idx})), 1));
-                anova_punctlifeimg = vertcat(anova_punctlifeimg, img_dat(n).(blech{idx})');
-            end
-            punctalife(n).fields{b} = img_dat(n).(blech{idx})';
-            [f, x] = ecdf(img_dat(n).(blech{idx})');
-            plot(x, f, 'color',  plotcolors(b,:)); hold on;
+blech = fieldnames(img_dat);
+blech_names = {'first_peak'; 'last_peak '; 'mean_peak '; 'stablepeak'};
+blech_idx = [5, 4, 2, 6]; % index of where these data occur in "img_dat"
+for n = 1:length(rootdirs)
+    figure;
+    for b = 1:length(blech_idx)
+        idx = blech_idx(b);
+        if b == 1
+            names_punctlifeimg = repmat(blech_names{b}, length(img_dat(n).(blech{idx})), 1);
+            anova_punctlifeimg = img_dat(n).(blech{idx})';
+        else
+            names_punctlifeimg = vertcat(names_punctlifeimg, repmat(blech_names{b}, length(img_dat(n).(blech{idx})), 1));
+            anova_punctlifeimg = vertcat(anova_punctlifeimg, img_dat(n).(blech{idx})');
         end
-        %[pli_p, pli_table, pli_stats] = anova1(anova_punctlifeimg, names_punctlifeimg, 'color', plotcolors);
-        %figure;boxplot(anova_punctlifeimg, names_punctlifeimg, 'notch', 'off', 'color', plotcolors);
-        %ylim([0 255]);
-        %multcompare(pli_stats);
-        clear anova_punctlifeimg names_punctlifeimg
+        punctalife(n).fields{b} = img_dat(n).(blech{idx})';
+        [f{b}, x{b}] = ecdf(img_dat(n).(blech{idx})');
+        gcf(h);
+        h = plot(x{b}, f{b}, 'color',  plotcolors(b,:)); hold on;
     end
+    %[pli_p, pli_table, pli_stats] = anova1(anova_punctlifeimg, names_punctlifeimg, 'color', plotcolors);
+    boxplot(anova_punctlifeimg, names_punctlifeimg, 'notch', 'off', 'color', plotcolors);
+    ylim([0 255]);
+    %multcompare(pli_stats);
+    clear anova_punctlifeimg names_punctlifeimg
 end
 
 % plot image peak ecdf
