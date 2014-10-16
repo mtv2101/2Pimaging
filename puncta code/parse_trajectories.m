@@ -4,15 +4,17 @@ warning('off','all');
 
 rootdirs = {'C:\Users\supersub\Desktop\Data\text files\0.5cutoff 8disp\all_latden\',...
     'C:\Users\supersub\Desktop\Data\text files\0.7cutoff 8disp\all_latden\',...
-     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\all_latden\'};%,...
-%     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\10min_control\'};%,...
+     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\all_latden\',...
+     'C:\Users\supersub\Desktop\Data\text files\2cutoff 8disp\all_latden\'};%,...
 %     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\all_latden\',...
 
-days = [1:8; 1:8; 1:8];%; 1:4; 5:8]; % days to analyze, lengths must be the same
-groupnames = {'0.7' '1.0' '2.0'}; %these names must contain the same number of characters
+days = [1:8; 1:8; 1:8; 1:8];%; 1:4; 5:8]; % days to analyze, lengths must be the same
+groupnames = {'0.5' '0.7' '1.0' '2.0'}; %these names must contain the same number of characters
+
+SUBTRACT_CONTROL = 1; 
 control_group = 4; % which rootdir contains the control data
 
-% Tableau 10 color Palette
+% re 10 color Palette
 blue = [31 119 180]./255;
 orange = [255 127 14]./255;
 green = [44 160 44]./255;
@@ -23,17 +25,16 @@ pink = [227 119 194]./255;
 grey = [127 127 127]./255;
 avocado = [188 189 34]./255;
 teal = [23 190 207]./255;
-plotcolors = [blue; orange; red; purple; green; brown; teal; grey];
-start_slope = 1; %day on which to start slope calculation.  Choose 2 to avoid day1-2 nonlinearity
+plotcolors = [grey; blue; red; orange; brown; green; teal; grey];
 
 % Choose plots
-PLOT_PLI = 1; % puncta brightness over lifetime
+PLOT_PLI = 0; % puncta brightness over lifetime
 PLOT_LIFETIMES = 0;
 PUNCTA_PEAKS = 0;
 PLOT_CUMLIFE = 0;
 PUNCTA_DAYS = 0;
 PLOT_PERSIST_PUNCTA = 0;
-PLOT_NLDAYS = 0;
+PLOT_NLDAYS = 1;
 PLOT_NLRATIO = 0;
 PLOT_SINGLES = 0;
 PLOT_SLOPES = 0;
@@ -48,8 +49,8 @@ for n = 1:length(rootdirs)
             lifetimeplot(roi_it,n) = plot(pp(1:end), 'Color', plotcolors(n,:)); ylim([0 1]); hold on;
             title(['Trajectory lifetimes over day ' mat2str(days(n,:))]);
         end
-        fitx = start_slope:(length(pp));
-        fity = pp(start_slope:end);
+        fitx = 1:(length(pp));
+        fity = pp(1:end);
         condition(n).allpuncta(k).fitcoeffs = polyfit(fitx, fity, 1); %linear fit
         stats(n).slopes(roi_it) = condition(n).allpuncta(k).fitcoeffs(1);
         roi_it = roi_it+1; %because some rois dont exist in the time window, "roi" specifies which ones are valid.
@@ -84,10 +85,7 @@ end
 
 % get puncta images analysis values
 for n = 1:length(rootdirs)
-   [img_dat(n).img_perday, img_dat(n).mean_peak, img_dat(n).max_peak,...
-       img_dat(n).last_peak, img_dat(n).first_peak, img_dat(n).second_peak,...
-       img_dat(n).third_peak, img_dat(n).four_peak, img_dat(n).stable_peak]...
-       = analyze_punctaimages(condition(n).allpuncta);
+   [img_dat(n)] = analyze_punctaimages(condition(n).allpuncta);
 end
         
 %%%% plotting %%%%
@@ -95,8 +93,8 @@ end
 % plot puncta brightness trends over lifetime
 if PLOT_PLI == 1
     blech = fieldnames(img_dat);
-    blech_names = {'first_peak'; 'secnd_peak'; 'third_peak'; 'four_peak '; 'last_peak '; 'stablepeak'};
-    blech_idx = [5, 6, 7, 8, 4, 9]; % index of where these data occur in "img_dat"
+    blech_names = {'first_peak'; 'secnd_peak'; 'third_peak'; 'four_peak '; 'five_peak '; 'six_peak  '; 'last_peak '; 'stablepeak'};
+    blech_idx = [4,7]; % index of where these data occur in "img_dat"
     for n = 1:length(rootdirs)
         figure;
         for b = 1:length(blech_idx)
@@ -212,6 +210,14 @@ if PLOT_NLDAYS == 1
             newday_anova = vertcat(newday_anova, newday_lin);
             lostday_names = vertcat(lostday_names, repmat(groupnames{n}, length(lostday_lin), 1));
             lostday_anova = vertcat(lostday_anova, lostday_lin);
+        end
+        if SUBTRACT_CONTROL == 1
+            if n == control_group
+                ctl_new = mean(newday_lin);
+                newday_anova = newday_anova - ctl_new;
+                ctl_lost = mean(lostday_lin);
+                lostday_anova = lostday_anova - ctl_lost;
+            end
         end
         clear new_daily lost_daily
     end

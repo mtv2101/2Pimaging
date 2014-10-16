@@ -50,8 +50,6 @@ img_dat.img_lastm1 = [];
 img_dat.img_lastm2 = [];
 img_dat.img_lastm3 = [];
 img_dat.img_lastm4 = [];
-img_dat.img_lastm5 = [];
-img_dat.img_lastm6 = [];
 i = 1;
 for n = 1:size(dat,2);
     %lifetimes = cat(2, lifetimes, dat(n).trajectory.lifetime);
@@ -84,26 +82,15 @@ for n = 1:size(dat,2);
                     sixth_idx(i) = 1;
                 end
             end
-            if dat(n).trajectory(m).lost(k) == 1 %if a puncta is lost
+            if dat(n).trajectory(m).lost(k) == 1
                 img_last = cat(3, img_last, dat(n).trajimg(m).img(:,:,end));
-                if sum(sum(dat(n).trajimg(m).img(:,:,end),2),1) == 0
-                    display([m, n, k]);
-                end
-                img_dat.img_lastm1 = cat(2, img_dat.img_lastm1, mean(mean(dat(n).trajimg(m).img(5:7,5:7,end-1),2),1));
+                img_dat.img_lastm1 = cat(2, img_dat.img_lastm1, mean(mean(dat(n).trajimg(m).img(5:7,5:7,end-1)),;
                 if k>2
-                    img_dat.img_lastm2 = cat(2, img_dat.img_lastm2, mean(mean(dat(n).trajimg(m).img(5:7,5:7,end-2),2),1));
-                end
-                if k>3
-                    img_dat.img_lastm3 = cat(2, img_dat.img_lastm3, mean(mean(dat(n).trajimg(m).img(5:7,5:7,end-3),2),1));
-                end
-                if k>4
-                    img_dat.img_lastm4 = cat(2, img_dat.img_lastm4, mean(mean(dat(n).trajimg(m).img(5:7,5:7,end-4),2),1));
-                end
-                if k>5
-                    img_dat.img_lastm5 = cat(2, img_dat.img_lastm5, mean(mean(dat(n).trajimg(m).img(5:7,5:7,end-5),2),1));
-                end
-                if k>6
-                    img_dat.img_lastm6 = cat(2, img_dat.img_lastm6, mean(mean(dat(n).trajimg(m).img(5:7,5:7,end-6),2),1));
+                    img_dat.img_lastm2 = cat(2, img_dat.img_lastm2, max(max(dat(n).trajimg(m).img(:,:,end-2));
+                elseif k>3
+                    img_dat.img_lastm3 = cat(2, img_dat.img_lastm3, max(max(dat(n).trajimg(m).img(:,:,end-3));
+                elseif k>4
+                    img_dat.img_lastm4 = cat(2, img_dat.img_lastm4,max(max( dat(n).trajimg(m).img(:,:,end-4));
                 end
                 last_idx(i) = 1;
             end
@@ -151,8 +138,8 @@ ranks = [.5, 1, 2, 3, 5, 10, 20, 30, 50, 70, 90]; % ranks to extract, in %, pseu
 
 for n = 1:size(images,3)
     offpeak(n) = mean([images_db(4,4,n), images_db(8,4,n), images_db(8,8,n), images_db(4,8,n)]);
-    %img_dat.mean_peak(n) = mean(mean(images_db(5:7, 5:7, n)));
-    %img_dat.max_peak(n) = max(max(images_db(5:7, 5:7, n),[],2),[],1);
+    img_dat.mean_peak(n) = mean(mean(images_db(5:7, 5:7, n)));
+    img_dat.max_peak(n) = max(max(images_db(5:7, 5:7, n),[],2),[],1);
     if n<=size(img_last,3)
         img_dat.last_peak(n) = mean(mean(img_last(5:7, 5:7, n),2),1);
     end
@@ -179,13 +166,13 @@ for n = 1:size(images,3)
     end
     %offpeak(n) = mean([images_db(5,5,n), images_db(7,5,n), images_db(7,7,n), images_db(5,7,n)]);
     %mean_peak(n) = images_db(6, 6, n);
-%     all_dyn(n) = (img_dat.mean_peak(n)-offpeak(n))/img_dat.mean_peak(n);
-% end  
-%    
-% all_dyn(all_dyn < 0) = NaN;
-% include_imgs = find(isfinite(all_dyn));
-% images_finite = images(:,:,include_imgs);
-% all_dyn_finite = all_dyn(isfinite(all_dyn));
+    all_dyn(n) = (img_dat.mean_peak(n)-offpeak(n))/img_dat.mean_peak(n);
+end  
+   
+all_dyn(all_dyn < 0) = NaN;
+include_imgs = find(isfinite(all_dyn));
+images_finite = images(:,:,include_imgs);
+all_dyn_finite = all_dyn(isfinite(all_dyn));
 % [rankedsharp, rank_idx] = sort(all_dyn_finite, 'descend');
 % len_dat = length(all_dyn_finite);
 % to_take = floor(len_dat*.005); % take 0.5% of data at each interval
@@ -203,10 +190,10 @@ for n = 1:size(images,3)
 %semilogx(ranks, fwhm, 'k'); hold on;
 %semilogx(ranks, errors, 'r');
 
-% [first_mean, firstsem, mean_first] = imgreduce(img_first);
-% first_sn = nanmean(MCdat(first_idx));
-% [sec_mean, secsem, mean_sec] = imgreduce(img_second);
-% sec_sn = nanmean(MCdat(sec_idx));
+[first_mean, firstsem, mean_first] = imgreduce(img_first);
+first_sn = nanmean(MCdat(first_idx));
+[sec_mean, secsem, mean_sec] = imgreduce(img_second);
+sec_sn = nanmean(MCdat(sec_idx));
 % [third_mean, thirdsem, mean_third] = imgreduce(img_third);
 %     third_sn = nanmean(MCdat(third_idx));
 % [four_mean, foursem, mean_four] = imgreduce(img_four);
@@ -215,10 +202,10 @@ for n = 1:size(images,3)
 %     fifth_sn = nanmean(MCdat(fifth_idx));
 % [six_mean, sixsem, mean_six] = imgreduce(img_six);
 %     six_sn = nanmean(MCdat(sixth_idx));
-% [last_mean, lastsem, mean_last] = imgreduce(img_last);
-% last_sn = nanmean(MCdat(last_idx));
-% [stable_mean, stablesem, mean_stable] = imgreduce(img_stable);
-% [all_mean, allsem, mean_all] = imgreduce(images);
+[last_mean, lastsem, mean_last] = imgreduce(img_last);
+last_sn = nanmean(MCdat(last_idx));
+[stable_mean, stablesem, mean_stable] = imgreduce(img_stable);
+[all_mean, allsem, mean_all] = imgreduce(images);
 
 % plot([first_mean(6), sec_mean(6), third_mean(6), four_mean(6), fifth_mean(6),...
 %     six_mean(6), stable_mean(6)]);
