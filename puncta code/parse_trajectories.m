@@ -2,14 +2,14 @@ clear all;
 
 warning('off','all');
 
-rootdirs = {'C:\Users\supersub\Desktop\Data\text files\0.5cutoff 8disp\all_latden\',...
-    'C:\Users\supersub\Desktop\Data\text files\0.7cutoff 8disp\all_latden\',...
-     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\all_latden\',...
-     'C:\Users\supersub\Desktop\Data\text files\2cutoff 8disp\all_latden\'};%,...
+rootdirs = {'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\all_latden\',...
+    'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\10min_control\'};%,...
+%     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\all_latden\',...
+%     'C:\Users\supersub\Desktop\Data\text files\2cutoff 8disp\all_latden\'};%,...
 %     'C:\Users\supersub\Desktop\Data\text files\1cutoff 8disp\all_latden\',...
 
-days = [1:8; 1:8; 1:8; 1:8];%; 1:4; 5:8]; % days to analyze, lengths must be the same
-groupnames = {'0.5' '0.7' '1.0' '2.0'}; %these names must contain the same number of characters
+days = [1:8; 1:8];%; 1:4; 5:8]; % days to analyze, lengths must be the same
+groupnames = {'10min' '1.0ld'}; %these names must contain the same number of characters
 
 SUBTRACT_CONTROL = 1; 
 control_group = 4; % which rootdir contains the control data
@@ -34,7 +34,7 @@ PUNCTA_PEAKS = 0;
 PLOT_CUMLIFE = 0;
 PUNCTA_DAYS = 0;
 PLOT_PERSIST_PUNCTA = 0;
-PLOT_NLDAYS = 1;
+PLOT_NLDAYS = 0;
 PLOT_NLRATIO = 0;
 PLOT_SINGLES = 0;
 PLOT_SLOPES = 0;
@@ -85,7 +85,7 @@ end
 
 % get puncta images analysis values
 for n = 1:length(rootdirs)
-   [img_dat(n)] = analyze_punctaimages(condition(n).allpuncta);
+   [img_dat(n)] = analyze_punctaimages(condition(n).allpuncta, plotcolors);
 end
         
 %%%% plotting %%%%
