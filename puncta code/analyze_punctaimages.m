@@ -32,7 +32,7 @@ for d = 1:length(dat(n).allimg) % for each day
             clear ii
         end
     end
-    img_perday(d).allimages = allimages;
+    img_dat.img_perday(d).allimages = allimages;
     clear allimages
 end
 
@@ -67,8 +67,8 @@ i = 1;
 for n = 1:size(dat,2);
     %lifetimes = cat(2, lifetimes, dat(n).trajectory.lifetime);
     for m = 1:size(dat(n).trajimg, 2)
-        for k = 1:size(dat(n).trajimg(m).img, 3) %for each day, this can index images, does not correspond to actual day#
-            day = dat(n).trajimg(m).framesobs(k); %this is day of puncta observation
+        for k = 1:size(dat(n).trajimg(m).img, 3) %for each day, this will index images, does not correspond to actual day#
+            day = dat(n).trajectory(m).framesobs(k); %this is day of puncta observation
             if isempty(dat(n).trajimg(m).img(:,:,k)) == 1 %if image is filled with NaNs becuase it crosses fov border
                 continue
             end
@@ -76,7 +76,7 @@ for n = 1:size(dat,2);
                 continue
             end
             img_all = cat(3, img_all, dat(n).trajimg(m).img(:,:,k));
-            if dat(n).trajectory(m).new(k) == 1 %if there is a new puncta
+            if dat(n).trajectory(m).new(day) == 1 %if there is a new puncta
                 img_first = cat(3, img_first, dat(n).trajimg(m).img(:,:,k));
                 first_idx(i) = 1;
                 if size(dat(n).trajimg(m).img,3) >= k+1 % if there is a puncta after the first
@@ -100,15 +100,15 @@ for n = 1:size(dat,2);
                     sixth_idx(i) = 1;
                 end
             end
-            if dat(n).trajectory(m).lost(k) == 1 %if a puncta is lost                
+            if dat(n).trajectory(m).lost(day) == 1 %if a puncta is lost                
                 if sum(sum(dat(n).trajimg(m).img(:,:,end),2),1) == 0
-                    display([m, n, k]);
+                    display([m, n, day]);
                     continue
                 end
-                if sum(dat(n).trajectory(m).new) == 1 %if no birth, puncta was stable before loss
-                   img_dat.last_lifetime = vertcat(img_dat.last_lifetime, 1); % 0=stable peak before loss
+                if sum(dat(n).trajectory(m).new) == 0 %if no birth, puncta was stable before loss
+                   img_dat.last_lifetime = vertcat(img_dat.last_lifetime, 0); % 0=stable peak before loss
                 else
-                   img_dat.last_lifetime = vertcat(img_dat.last_lifetime, 0); % 1=peak born before loss
+                   img_dat.last_lifetime = vertcat(img_dat.last_lifetime, 1); % 1=peak born before loss
                 end
                 img_dat.last_peak = cat(2, img_dat.last_peak, mean(mean(dat(n).trajimg(m).img(5:7,5:7,end),2),1));
                 img_dat.img_lastm1 = cat(2, img_dat.img_lastm1, mean(mean(dat(n).trajimg(m).img(5:7,5:7,end-1),2),1));
