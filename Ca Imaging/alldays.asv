@@ -1,11 +1,11 @@
 clear all
 
-numdays = 4;
-cd('C:\Users\supersub\Claire Dropbox\Dropbox\Matlab\Difficult task');
+numdays = 2;
+cd('D:\040714-01\Comparisons\Odor exposure versus 2014-06-10');
 ALLROI = 0; % if = 1 plot all data in huge graphs
 
-odor1 = '6EB 4AA';
-odor2 = '4EB 6AA';
+odor1 = 'CINEOLE';
+odor2 = 'VALEDHYD';
 %odor1 = 'HEXANONE';
 %odor2 = 'ETHYL TIG';
 %odor1 = 'VALEDHYD';

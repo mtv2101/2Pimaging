@@ -17,7 +17,7 @@ beh4 = beh_types{4}; %'MISS';
 ALLROI = 0; % if =1 plot all traces in all rois
 % OdorON = 120; % frame odor was delivered
 triallen = 300;
-sig_win = 15; % test for significant changes in windows of this size
+sig_win = 20; % test for significant changes in windows of this size
 post_x = 10; % multiply sig_win by this to get number of post-baseline frames
 pre_x = 5;
 alpha = .01;
