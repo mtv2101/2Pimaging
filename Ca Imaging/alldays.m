@@ -25,7 +25,10 @@ for day = 1:numdays
     [ALLDAYS(day)] = parse_odors_behaviors(ALLBLOCKS, behaviors, odor1, odor2, beh_types);
 end
 
-for day = 1:numdays
-    figure;
-    plot_odors(day, ALLDAYS, blockdir, odor1, odor2);
-end
+%define conditions to compare
+% e.g. compare1 = cat(1, ALLDAYS(day).allblocks.o1b1, ALLDAYS(day).allblocks.o1b2);
+day = 4;
+compare1 = ALLDAYS(day).allblocks.o1b1;
+compare2 = ALLDAYS(day).allblocks.o2b2;
+figure;
+plot_odors(compare1, compare2, day, ALLDAYS, blockdir, odor1, odor2);

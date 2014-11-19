@@ -1,4 +1,4 @@
-function plot_odors(day, ALLDAYS, rootdir, odor1, odor2)
+function plot_odors(compare1, compare2, day, ALLDAYS, rootdir, odor1, odor2)
 
 % Dependency: shadedErrorBar.m
 % http://www.mathworks.com/matlabcentral/fileexchange/26311-shadederrorbar
@@ -8,9 +8,6 @@ OdorOnTime = 103; %Frame that odor valve opens
 OdorOffTime = 133; %Frame that odor valve closes
 
 %%%%%%%%% get data
-
-allblocks_parsed = ALLDAYS(day).allblocks;
-fields = fieldnames(allblocks_parsed);
 has_respo1 = [];has_respo2 = [];has_tune = [];o1_resp_amp = [];o2_resp_amp = [];
 for roi = 1:length(ALLDAYS(day).stats)
     has_respo1 = cat(2, has_respo1, ALLDAYS(day).stats(roi).sig_o1all);
@@ -19,15 +16,8 @@ for roi = 1:length(ALLDAYS(day).stats)
     o1_resp_amp = cat(2,o1_resp_amp, nanmean(ALLDAYS(day).stats(roi).mean_times(:,1:4),2));
     o2_resp_amp = cat(2,o2_resp_amp, nanmean(ALLDAYS(day).stats(roi).mean_times(:,5:8),2));
 end
-
-% allblock_o1 = cat(1, allblocks_parsed.o1b1, allblocks_parsed.o1b2,...
-%     allblocks_parsed.o1b3, allblocks_parsed.o1b4);
-% allblock_o2 = cat(1, allblocks_parsed.o2b1, allblocks_parsed.o2b2,...
-%     allblocks_parsed.o2b3, allblocks_parsed.o2b4);
-
-%%% hack fix to compare two specific behavioral outcomes instead of two odors
-allblock_b1 = allblocks_parsed.o1b1;
-allblock_b2 = allblocks_parsed.o2b4;
+allblock_1 = compare1;
+allblock_2 = compare2;
     
 %%%%%%%%% sort ROIS
 statfields = {'sig_o1all', 'sig_o2all', 'sig_odortuned', 'sig_behaviors'};
@@ -113,14 +103,14 @@ has_anyo1 = logical(has_anyo1);
 has_anyo2 = zeros(1,size(has_respo2,2));
 has_anyo2(any(has_respo2)) = 1;
 has_anyo2 = logical(has_anyo2);
-    if ~isempty(allblock_b1)
-        o1mean = squeeze(nanmean(allblock_b1(:,:,has_anyo1),3));
+    if ~isempty(allblock_1)
+        o1mean = squeeze(nanmean(allblock_1(:,:,has_anyo1),3));
         o1mean_nonan = o1mean;
         o1mean_nonan(isnan(o1mean)) = 0; %remove NaNs because they screw up the std function
         o1error = std(o1mean_nonan,[],1)/sqrt(size(o1mean_nonan,1));
     end
-    if ~isempty(allblock_b2)
-        o2mean = squeeze(nanmean(allblock_b2(:,:,has_anyo2),3));
+    if ~isempty(allblock_2)
+        o2mean = squeeze(nanmean(allblock_2(:,:,has_anyo2),3));
         o2mean_nonan = o2mean;
         o2mean_nonan(isnan(o2mean)) = 0; %remove NaNs because they screw up the std function
         o2error = std(o2mean_nonan,[],1)/sqrt(size(o2mean_nonan,1));
@@ -170,11 +160,11 @@ ylabel('df/f');
 if ALLROI == 1
     cat_allblock_o1 = [];
     cat_allblock_o2 = [];
-    for k = 1:size(allblock_b1,4)
-        cat_allblock_o1 = cat(1, cat_allblock_o1, allblock_b1(:,:,:,k));
-        cat_allblock_o2 = cat(1, cat_allblock_o2, allblock_b2(:,:,:,k));
+    for k = 1:size(allblock_1,4)
+        cat_allblock_o1 = cat(1, cat_allblock_o1, allblock_1(:,:,:,k));
+        cat_allblock_o2 = cat(1, cat_allblock_o2, allblock_2(:,:,:,k));
     end
-    numsubplots = size(allblock_b1, 3); %number of ROIs
+    numsubplots = size(allblock_1, 3); %number of ROIs
     rows = ceil(sqrt(numsubplots));
     figure;
     for s = 1:numsubplots
