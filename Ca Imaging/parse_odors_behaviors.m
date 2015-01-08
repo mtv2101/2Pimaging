@@ -1,12 +1,7 @@
 function [ALLDAYS] =  parse_odors_behaviors(ALLBLOCKS, behaviors, odor1, odor2, beh_types)
 
 % run this after parseROIs
-% 2014-05-19 Code changed to remove loop bug when separating dff odor behaviors
-% also OdONFrameIndx removed since valve timing has been corrected - Kurt
-%
-% 
-% to do:
-% figure out repeated measures errors
+
 
 BLOCKS = 1:length(ALLBLOCKS);
 

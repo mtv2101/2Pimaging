@@ -21,7 +21,6 @@ cd(rootdir);
 load 'ALLBLOCKS.mat'
 Filenames = dir(['*wave_block*']);
 base_win = [20:100]; %frames that define baseline for df/f
-takeforf0 = 0.2; % fraction of lowest-amplitude timeseries data values to average for f0
 trial_reject = .5; %reject trials with more than this fraction of discarded frames
 
 for x = 1:length(ALLBLOCKS) %for each block
@@ -61,20 +60,19 @@ for x = 1:length(ALLBLOCKS) %for each block
     end
     ALLBLOCKS(x).rejtrial = rejtrial;
     
-    %%%%%%%%%%%%%%% do df/f using bottom fraction of data defined by takeforf0
+    %%%%%%%%%%%%%%% do df/f
     for r = 1:size(alldat,2) %for each roi
         dims = size(dat);
         for t = 1:dims(1) %for each trial            
             ft = squeeze(dat(t,:,r)); %timeseries
-            [ft_rank, ft_rank_idx] = sort(ft);
-            toget = ciel(length(ft)/takeforf0); %number of frames representing bottom fraction of data values
-            f0 = nanmean(ft_rank(1:toget));
-            df = (ft-f0)/f0; %df/f
-            alldff(t,:,r) = df;
+            [ft_rank, ft_rank_idx] = sort(ft)
+            f0 = 
+            f0 = nanmean(ft(:,base_win), 2); %mean of baseline window within each block
+            df = (ft(:)-f0)./f0; %df/f
+            alldff(:,:,r) = reshape(df,dims(1),dims(2));
         end
     end
-    
-     %%%%%%%%%%%%%%% do df/f using mean of all timeseries
+
 %    for r = 1:size(alldat,2) %for each roi
 %         dims = size(dat);          
 %         ft = dat(:,:,r); %timeseries
