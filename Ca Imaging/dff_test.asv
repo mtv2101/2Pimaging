@@ -41,7 +41,7 @@ for r = 1:size(dat,3); %for each roi
 end
 
 [dffmean_rank, dffmean_rankidx] = sort(alldffmean(:));
-    findnan = find(isnan(dffmean_rank) == 1, 1); %  get last trace before the sorted nan traces
+    findnan = min(find(isnan(dffmean_rank) == 1)); % get last trace before the sorted nan traces
 [rankidx_i, rankidx_j] = ind2sub(size(alldffmean), dffmean_rankidx);
 dff_f0_rank = dff_percentile(:);
 dff_f0_rank = dff_f0_rank(dffmean_rankidx);
@@ -56,11 +56,10 @@ figure;
         scatter(1:length(dff_f0_rank), dff_f0_rank, '.', 'r');
     subplot(2,2,3); %max mean dff
         plot(alldff(rankidx_i(1),:,rankidx_j(1)), 'k'); hold on;
-        plot([1:dims(2)],(dff_percentile(rankidx_i(1),rankidx_j(1))), 'r');
+        plot(dff_percentile(rankidx_i(1),:,rankidx_j(1))
         ylim([toplotmin, toplotmax]);
     subplot(2,2,4); %min mean dff
         plot(alldff(rankidx_i(findnan-1),:,rankidx_j(findnan-1)), 'k'); hold on;
-        plot([1:dims(2)],(dff_percentile(rankidx_i(findnan-1),rankidx_j(findnan-1))), 'r');
         ylim([toplotmin, toplotmax]);
 
 trial = 3;
