@@ -4,7 +4,7 @@
 % waves from each roi done in FIJI must be saved with filename
 % containing "wave_block" so that it loads correctly
 
-% 2014-07-07 Kurt modified line 25 to allow loading wave .txt tab delimited files
+% 2014-07-07 Kurt modified to use dlmread to allow loading wave .txt tab delimited files
 % instead of needing to first convert to a .mat file.
 
 % This code does 4 things:
@@ -14,13 +14,16 @@
 % 3. Trials are rejected if there are too many dropped frames
 % 4. df/f traces are saved to ALLBLOCKS
 
+
+%% to do 
+%% rank trials by average df/f and then pick out highly ative and low active trrials to visualize 
 clear all
 
 rootdir = 'D:\Metch olfactometer study\031114-07\2014-05-13';
 cd(rootdir);
 load 'ALLBLOCKS.mat'
 Filenames = dir(['*wave_block*']);
-base_win = [20:100]; %frames that define baseline for df/f
+%base_win = [20:100]; %frames that define baseline for df/f
 takeforf0 = 0.2; % fraction of lowest-amplitude timeseries data values to average for f0
 trial_reject = .5; %reject trials with more than this fraction of discarded frames
 
@@ -62,12 +65,16 @@ for x = 1:length(ALLBLOCKS) %for each block
     ALLBLOCKS(x).rejtrial = rejtrial;
     
     %%%%%%%%%%%%%%% do df/f using bottom fraction of data defined by takeforf0
-    for r = 1:size(alldat,2) %for each roi
+    for r = 1:size(alldat,3) %for each roi
         dims = size(dat);
-        for t = 1:dims(1) %for each trial            
+        for t = 1:dims(1) %for each trial                
+            smth_trials(t,:) = medfilt1(alldat(t,:,r)) %smooth individual trials before averaging
+            alltrial_base = nanmean(smth_trials, 1); % get mean of all roi trials to use as a baseline
+        for t = 1:dims(1) %for each trial       
             ft = squeeze(dat(t,:,r)); %timeseries
+            ft = ft - alltrial_base; % subtract alltrial baseline 
             [ft_rank, ft_rank_idx] = sort(ft);
-            toget = ciel(length(ft)/takeforf0); %number of frames representing bottom fraction of data values
+            toget = ciel(length(ft)*takeforf0); %number of frames representing bottom fraction of data values
             f0 = nanmean(ft_rank(1:toget));
             df = (ft-f0)/f0; %df/f
             alldff(t,:,r) = df;
