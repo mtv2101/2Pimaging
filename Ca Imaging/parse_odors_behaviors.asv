@@ -86,7 +86,7 @@ b3 = logical(b3);
 b4 = logical(b4);
 
 % gather all trials of same odor and same behavior
-fieldnames = {'o1b1','o1b2','o1b3','o1b4','o2b1','o2b2','o2b3','o2b4'};
+fieldnames = {'o1b1','o1b2','o1b3','o1b4','o2b1','o2b2','o2b3','o2
 allblocks_parsed.o1b1 = [];allblocks_parsed.o1b2 = [];allblocks_parsed.o1b3 = [];
 allblocks_parsed.o1b4 = [];allblocks_parsed.o2b1 = [];allblocks_parsed.o2b2 = [];
 allblocks_parsed.o2b3 = [];allblocks_parsed.o2b4 = [];
@@ -141,15 +141,15 @@ end
 
 group1_data = [];
 for i = 1:length(group1)
-    group1_data = cat(1, group1_data, allblocks_parsed.(fieldnames{group1(i)}));
+    group1_data = cat(1, group1_data, allblocks_parsed(group1(i)));
 end
 group2_data = [];
 for i = 1:length(group2)
-    group2_data = cat(1, group2_data, allblocks_parsed.(fieldnames{group2(i)}));
+    group2_data = cat(1, group2_data, allblocks_parsed(group2(i)));
 end
     
-[ALLDAYS, ALLBLOCKS] = odor_stats(ALLBLOCKS, sig_win, post_x, pre_x, alpha,...
-    postframes, preframes, group1_data, group2_data);
+[ALLDAYS, ALLBLOCKS] = odor_stats(ALLBLOCKS, allblocks_parsed, sig_win,...
+    post_x, pre_x, alpha, postframes, preframes, group1_data, group2_data);
 
 [ALLDAYS, ALLBLOCKS] = beh_stats(ALLDAYS, ALLBLOCKS,...
     allblocks_parsed, post_x, pre_x, sig_win, alpha, postframes, preframes,...

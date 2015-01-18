@@ -1,11 +1,11 @@
 function [ALLDAYS, ALLBLOCKS] = beh_stats(ALLDAYS, ALLBLOCKS,...
-    allblocks_parsed, post_x, pre_x, sig_win, alpha, postframes, preframes,...
+    allblocks_parsed, post_x, pre_x, sig_win, alpha, postframes, preframes...
     group1_data, group2_data)
 
 fields = fieldnames(allblocks_parsed);
 dat = [];
 hasdata = zeros(1,numel(fields));
-for n = 1:numel(fields) % for each odor/behavior pair
+for n = 1:numel(fields) % for each odor/bnehavior pair
     if size(allblocks_parsed.(fields{n}), 1) > 3 %only consider those with more than 3 trials
         hasdata(n) = 1;
     end

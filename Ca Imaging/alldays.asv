@@ -15,7 +15,7 @@ odor_types = {'6EB 4AA', '4EB 6AA'}; % must be 2 odors
 % load "ALLBLOCKS" and "behaviors"
 [blockname, blockdir, filtindx] = uigetfile('ALLBLOCKS*', 'MultiSelect', 'on');
 [behname, behdir, filtindx] = uigetfile('behaviors*', 'MultiSelect', 'on');
-numdays = size(blockname,1);
+numdays = length(blockdir)
 
 group1 = (1:4); %odor1:behavior1-4 are 1-4, odor2:behavior1-4 are 5-8; any arbirary grouping works
 group2 = (5:8);
