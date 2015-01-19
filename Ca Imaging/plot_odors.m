@@ -1,4 +1,4 @@
-function plot_odors(day, ALLDAYS, group1_data, group2_data)
+function plot_odors(day, ALLDAYS, group1_data, group2_data, rootdir)
 
 % Dependency: shadedErrorBar.m
 % http://www.mathworks.com/matlabcentral/fileexchange/26311-shadederrorbar
@@ -8,19 +8,19 @@ OdorOnTime = 103; %Frame that odor valve opens
 OdorOffTime = 133; %Frame that odor valve closes
 
 %%%%%%%%% get data
-has_respo1 = [];has_respo2 = [];has_tune = [];o1_resp_amp = [];o2_resp_amp = [];
+has_respo1 = [];has_respo2 = [];has_tune = [];gp1_resp_amp = [];gp2_resp_amp = [];
 for roi = 1:length(ALLDAYS(day).stats)
     has_respo1 = cat(2, has_respo1, ALLDAYS(day).stats(roi).sig_o1all);
     has_respo2 = cat(2, has_respo2, ALLDAYS(day).stats(roi).sig_o2all);
     has_tune = cat(2, has_tune, ALLDAYS(day).stats(roi).sig_odortuned);
-    o1_resp_amp = cat(2,o1_resp_amp, nanmean(ALLDAYS(day).stats(roi).mean_times(:,1:4),2));
-    o2_resp_amp = cat(2,o2_resp_amp, nanmean(ALLDAYS(day).stats(roi).mean_times(:,5:8),2));
+    gp1_resp_amp = cat(2,gp1_resp_amp, nanmean(ALLDAYS(day).stats(roi).mean_times_gp1(:,1:4),2));
+    gp2_resp_amp = cat(2,gp2_resp_amp, nanmean(ALLDAYS(day).stats(roi).mean_times_gp2(:,5:8),2));
 end
 allblock_1 = group1_data;
 allblock_2 = group2_data;
     
 %%%%%%%%% sort ROIS
-statfields = {'sig_o1all', 'sig_o2all', 'sig_odortuned', 'sig_behaviors'};
+statfields = {'sig_o1all', 'sig_o2all', 'sig_odortuned'};
 for d = 1:length(ALLDAYS)
     %alldays_fields = fieldnames(ALLDAYS(d).stats);
     for roi = 1:length(ALLDAYS(day).stats)
@@ -35,9 +35,9 @@ numsigs = squeeze(nansum(nansum(ns,3),1));
 
 for n = 1:length(ALLDAYS(day).stats) %for each roi
     has_respo1_sort(:,n) = has_respo1(:,sortrespo_indx(n));
-    sort_respo1_amp(:,n) = o1_resp_amp(:,sortrespo_indx(n));
+    sort_respo1_amp(:,n) = gp1_resp_amp(:,sortrespo_indx(n));
     has_respo2_sort(:,n) = has_respo2(:,sortrespo_indx(n));
-    sort_respo2_amp(:,n) = o2_resp_amp(:,sortrespo_indx(n));
+    sort_respo2_amp(:,n) = gp2_resp_amp(:,sortrespo_indx(n));
     sort_has_tune(:,n) = has_tune(:,sortrespo_indx(n));
 end
 

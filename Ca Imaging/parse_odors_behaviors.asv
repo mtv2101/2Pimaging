@@ -1,28 +1,29 @@
-function [ALLDAYS, group1_data, group2_data] =  parse_odors_behaviors(ALLBLOCKS, behaviors, group1, group2, odor_types, beh_types)
+function [ALLDAYS, group1_data, group2_data] =  parse_odors_behaviors(...
+    ALLBLOCKS, behaviors, group1, group2, odor_types, beh_types, parse_params)
 
 % run this after parseROIs
 
 
 BLOCKS = 1:length(ALLBLOCKS);
 
-ALLROI = 0; % if =1 plot all traces in all rois
 % OdorON = 120; % frame odor was delivered
-triallen = 300;
-sig_win = 20; % test for significant changes in windows of this size
-post_x = 10; % multiply sig_win by this to get number of post-baseline frames
-pre_x = 5;
-alpha = .01;
-postframes = sig_win*post_x;
-preframes = sig_win*pre_x;
-if postframes + preframes ~= triallen
-    fprintf 'Please choose different "postframes" or "preframes" or "sig_win"';
-    return
-end
+% triallen = 300;
+% sig_win = 20; % test for significant changes in windows of this size
+% post_x = 10; % multiply sig_win by this to get number of post-baseline frames
+% pre_x = 5;
+% alpha = .01;
+% postframes = sig_win*post_x;
+% preframes = sig_win*pre_x;
+% if postframes + preframes ~= triallen
+%     fprintf 'Please choose different "postframes" or "preframes" or "sig_win"';
+%     return
+% end
 %cd(rootdir);
 
 %load 'ALLBLOCKS.mat'
 %load 'behaviors.mat'
 
+parse_params = [triallen, sig_win, post_x, pre_x, alpha];
 % find what odors are used on what trials
 o1_indx = regexp(behaviors, odor_types{1});
 o2_indx = regexp(behaviors, odor_types{2});
@@ -86,7 +87,7 @@ b3 = logical(b3);
 b4 = logical(b4);
 
 % gather all trials of same odor and same behavior
-fieldnames = {'o1b1','o1b2','o1b3','o1b4','o2b1','o2b2','o2b3','o2
+fieldnames = {'o1b1','o1b2','o1b3','o1b4','o2b1','o2b2','o2b3','o2b4'};
 allblocks_parsed.o1b1 = [];allblocks_parsed.o1b2 = [];allblocks_parsed.o1b3 = [];
 allblocks_parsed.o1b4 = [];allblocks_parsed.o2b1 = [];allblocks_parsed.o2b2 = [];
 allblocks_parsed.o2b3 = [];allblocks_parsed.o2b4 = [];
@@ -141,15 +142,15 @@ end
 
 group1_data = [];
 for i = 1:length(group1)
-    group1_data = cat(1, group1_data, allblocks_parsed(group1(i)));
+    group1_data = cat(1, group1_data, allblocks_parsed.(fieldnames{group1(i)}));
 end
 group2_data = [];
 for i = 1:length(group2)
-    group2_data = cat(1, group2_data, allblocks_parsed(group2(i)));
+    group2_data = cat(1, group2_data, allblocks_parsed.(fieldnames{group2(i)}));
 end
     
-[ALLDAYS, ALLBLOCKS] = odor_stats(ALLBLOCKS, allblocks_parsed, sig_win,...
-    post_x, pre_x, alpha, postframes, preframes, group1_data, group2_data);
+[ALLDAYS, ALLBLOCKS] = odor_stats(ALLBLOCKS, sig_win, post_x, pre_x, alpha,...
+    postframes, preframes, group1_data, group2_data);
 
 [ALLDAYS, ALLBLOCKS] = beh_stats(ALLDAYS, ALLBLOCKS,...
     allblocks_parsed, post_x, pre_x, sig_win, alpha, postframes, preframes,...

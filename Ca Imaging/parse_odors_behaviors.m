@@ -1,27 +1,16 @@
-function [ALLDAYS, group1_data, group2_data] =  parse_odors_behaviors(ALLBLOCKS, behaviors, group1, group2, odor_types, beh_types)
+function [ALLDAYS, group1_data, group2_data] =  parse_odors_behaviors(...
+    ALLBLOCKS, behaviors, group1, group2, odor_types, beh_types, parse_params)
 
 % run this after parseROIs
 
 
 BLOCKS = 1:length(ALLBLOCKS);
 
-ALLROI = 0; % if =1 plot all traces in all rois
-% OdorON = 120; % frame odor was delivered
-triallen = 300;
-sig_win = 20; % test for significant changes in windows of this size
-post_x = 10; % multiply sig_win by this to get number of post-baseline frames
-pre_x = 5;
-alpha = .01;
-postframes = sig_win*post_x;
-preframes = sig_win*pre_x;
-if postframes + preframes ~= triallen
-    fprintf 'Please choose different "postframes" or "preframes" or "sig_win"';
-    return
-end
-%cd(rootdir);
-
-%load 'ALLBLOCKS.mat'
-%load 'behaviors.mat'
+triallen = parse_params(1);
+sig_win = parse_params(2);
+post_x = parse_params(3);
+pre_x = parse_params(4);
+alpha = parse_params(5);
 
 % find what odors are used on what trials
 o1_indx = regexp(behaviors, odor_types{1});
@@ -147,13 +136,6 @@ group2_data = [];
 for i = 1:length(group2)
     group2_data = cat(1, group2_data, allblocks_parsed.(fieldnames{group2(i)}));
 end
-    
-[ALLDAYS, ALLBLOCKS] = odor_stats(ALLBLOCKS, sig_win, post_x, pre_x, alpha,...
-    postframes, preframes, group1_data, group2_data);
-
-[ALLDAYS, ALLBLOCKS] = beh_stats(ALLDAYS, ALLBLOCKS,...
-    allblocks_parsed, post_x, pre_x, sig_win, alpha, postframes, preframes,...
-    group1_data, group2_data);
 
 ALLDAYS.allblocks = allblocks_parsed;
 
