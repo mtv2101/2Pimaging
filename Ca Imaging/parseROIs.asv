@@ -28,7 +28,7 @@ takeforf0 = 0.2; % fraction of lowest-amplitude timeseries data values to averag
 trial_reject = .5; %reject trials with more than this fraction of discarded frames
 
 all_alldffmean = [];
-all_alldff = [];
+all_dff_percentile = [];
 for x = 1:length(ALLBLOCKS) %for each block
     disp(['analyzing block ', num2str(x)]);
 %   d = struct2cell(load(Filenames(x).name)); For loading .mat format 
@@ -89,15 +89,17 @@ for x = 1:length(ALLBLOCKS) %for each block
             df = (ft-f0(t,r))/f0(t,r); %df/f
             alldff(t,:,r) = df;
             alldffmean(t,r) = nanmean(df);
+            [dff_takeforf0, dff_takeforf0_idx] = sort(df); % recalculate mean of lower percentile of frames using dff
+            dff_percentile(t,r) = nanmean(dff_takeforf0(1:toget));
         end
     end
     
 all_alldffmean = cat(1, all_alldffmean, alldffmean);
-all_alldff = cat(1, all_alldff, alldff);
+all_dff_percentile = cat(1, all_dff_percentile, dff_percentile);
 ALLBLOCKS(x).dff = alldff;
 save(['ALLBLOCKS.mat'], 'ALLBLOCKS');
 
-clear rejtrial dat ft alldff 
+clear rejtrial alldff dat ft    
 end
     
 [dffmean_rank, dffmean_rankidx] = sort(all_alldffmean(:));
@@ -106,21 +108,22 @@ end
         findnan = length(dffmean_rank);
     end            
 [rankidx_i, rankidx_j] = ind2sub(size(all_alldffmean), dffmean_rankidx);
+dff_f0_rank = all_dff_percentile(:);
+dff_f0_rank = dff_f0_rank(dffmean_rankidx);
 
-% set plot min and max y axis to the largest df/f waveform
-toplotmin = nanmin(all_alldff(rankidx_i(findnan-1),:,rankidx_j(findnan-1)));
-toplotmax = nanmax(all_alldff(rankidx_i(findnan-1),:,rankidx_j(findnan-1)));
-
-mean_alldff = nanmean(reshape(all_alldff, [size(all_alldff,1)*size(all_alldff,3),size(all_alldff,2)]),1);
+toplotmin = nanmin(alldff(rankidx_i(1),:,rankidx_j(1)));
+toplotmax = nanmax(alldff(rankidx_i(1),:,rankidx_j(1)));
+%toplotmax = nanmax(alldff(rankidx_i(findnan-1),:,rankidx_j(findnan-1)));
 
 figure;
     subplot(2,2,[1,2]);
         plot(dffmean_rank, 'k');hold on;
+        scatter(1:length(dff_f0_rank), dff_f0_rank, '.', 'r');
     subplot(2,2,3); %max mean dff
-        plot(all_alldff(rankidx_i(1),:,rankidx_j(1)), 'k'); hold on;
-        plot(mean_alldff,'r');
+        plot(alldff(rankidx_i(1),:,rankidx_j(1)), 'k'); hold on;
+        plot([1:dims(2)],(dff_percentile(rankidx_i(1),rankidx_j(1))), 'r');
         ylim([toplotmin, toplotmax]);
     subplot(2,2,4); %min mean dff
-        plot(all_alldff(rankidx_i(findnan-1),:,rankidx_j(findnan-1)), 'k'); hold on;
-        plot(mean_alldff,'r');
+        plot(alldff(rankidx_i(findnan-1),:,rankidx_j(findnan-1)), 'k'); hold on;
+        plot([1:dims(2)],(dff_percentile(rankidx_i(findnan-1),rankidx_j(findnan-1))), 'r');
         ylim([toplotmin, toplotmax]);
