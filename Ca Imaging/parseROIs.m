@@ -15,8 +15,6 @@
 % 4. df/f traces are saved to ALLBLOCKS
 
 
-%% to do 
-%% rank trials by average df/f and then pick out highly ative and low active trrials to visualize 
 clear all
 
 rootdir = 'C:\Users\supersub\Claire Dropbox\Dropbox\Matlab\documents-export-2015-01-20';
@@ -30,7 +28,7 @@ trial_reject = .5; %reject trials with more than this fraction of discarded fram
 all_alldffmean = [];
 all_alldff = [];
 for x = 1:length(ALLBLOCKS) %for each block
-    disp(['analyzing block ', num2str(x)]);
+    disp(['dffing block ', num2str(x)]);
 %   d = struct2cell(load(Filenames(x).name)); For loading .mat format 
     d = {dlmread(Filenames(x).name, '\t', 1, 1)};
     alldat = d{1};
@@ -88,34 +86,40 @@ for x = 1:length(ALLBLOCKS) %for each block
             f0(t,r) = nanmean(ft_rank(1:toget)); % get mean of lower percentile of frames
             df = (ft-f0(t,r))/f0(t,r); %df/f
             alldff(t,:,r) = df;
-            alldffmean(t,r) = nanmean(df);
+            %alldffmean(t,r) = nanmean(df);
         end
     end
     
-all_alldffmean = cat(1, all_alldffmean, alldffmean);
-all_alldff = cat(1, all_alldff, alldff);
-ALLBLOCKS(x).dff = alldff;
-save(['ALLBLOCKS.mat'], 'ALLBLOCKS');
+    %all_alldffmean = cat(1, all_alldffmean, alldffmean);
+    all_alldff = cat(1, all_alldff, alldff);
+    ALLBLOCKS(x).dff = alldff;
+    save(['ALLBLOCKS.mat'], 'ALLBLOCKS');
 
-clear rejtrial dat ft alldff 
+    clear rejtrial dat ft alldff 
 end
-    
+
+all_alldffmean = squeeze(nanmean(all_alldff,2));
 [dffmean_rank, dffmean_rankidx] = sort(all_alldffmean(:));
-    findnan = find(isnan(dffmean_rank) == 1, 1); % get last trace before the sorted nan traces
-    if isempty(findnan) % if there are no nans
-        findnan = length(dffmean_rank);
-    end            
+findnan = find(isnan(dffmean_rank) == 1, 1); % get last trace before the sorted nan traces
+if isempty(findnan) % if there are no nans
+    findnan = length(dffmean_rank);
+end            
 [rankidx_i, rankidx_j] = ind2sub(size(all_alldffmean), dffmean_rankidx);
 
 % set plot min and max y axis to the largest df/f waveform
 toplotmin = nanmin(all_alldff(rankidx_i(findnan-1),:,rankidx_j(findnan-1)));
 toplotmax = nanmax(all_alldff(rankidx_i(findnan-1),:,rankidx_j(findnan-1)));
 
-mean_alldff = nanmean(reshape(all_alldff, [size(all_alldff,1)*size(all_alldff,3),size(all_alldff,2)]),1);
+all_all_alldff = permute(all_alldff, [1 3 2]);
+all_all_alldff = reshape(all_all_alldff, [length(dffmean_rankidx),size(all_alldff,2)]);
+mean_alldff = nanmean(all_all_alldff,1);
 
+[hist_dffy, hist_dffx] = hist(dffmean_rank, 100);
 figure;
-    subplot(2,2,[1,2]);
-        plot(dffmean_rank, 'k');hold on;
+    subplot(2,2,1);
+        [hAx,hLine1,hLine2] = plotyy(dffmean_rank,1:length(dffmean_rank),hist_dffx,hist_dffy);
+    subplot(2,2,2)
+        imagesc(all_all_alldff(dffmean_rankidx, :));
     subplot(2,2,3); %max mean dff
         plot(all_alldff(rankidx_i(1),:,rankidx_j(1)), 'k'); hold on;
         plot(mean_alldff,'r');
