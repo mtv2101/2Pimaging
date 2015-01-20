@@ -117,11 +117,12 @@ mean_alldff = nanmean(all_all_alldff,1);
 [hist_dffy, hist_dffx] = hist(dffmean_rank, 100);
 figure;
     subplot(2,2,1);
-    plotyy(dffmean_rank,1:length(dffmean_rank),hist_dffx,hist_dffy);
-        plot(dffmean_rank,1:length(dffmean_rank), 'k');hold on;
-        plot(1:size(all_all_alldff,2), hist_dff, 'r');
+        [hAx,hLine1,hLine2] = plotyy(dffmean_rank,1:length(dffmean_rank),hist_dffx,hist_dffy);
+        title('sorted mean df/f values and histogram of mean df/f values');
+        xlabel('mean df/f');
     subplot(2,2,2)
         imagesc(all_all_alldff(dffmean_rankidx, :));
+        title('
     subplot(2,2,3); %max mean dff
         plot(all_alldff(rankidx_i(1),:,rankidx_j(1)), 'k'); hold on;
         plot(mean_alldff,'r');

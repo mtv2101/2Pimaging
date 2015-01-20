@@ -118,13 +118,24 @@ mean_alldff = nanmean(all_all_alldff,1);
 figure;
     subplot(2,2,1);
         [hAx,hLine1,hLine2] = plotyy(dffmean_rank,1:length(dffmean_rank),hist_dffx,hist_dffy);
+        title('sorted mean df/f values and histogram of mean df/f values');
+        xlabel('mean df/f');
     subplot(2,2,2)
         imagesc(all_all_alldff(dffmean_rankidx, :));
+        title('waveforms from all trials sorted by mean df/f');
+        xlabel('time (frames)');
+        ylabel('trial # (sorted)');
     subplot(2,2,3); %max mean dff
         plot(all_alldff(rankidx_i(1),:,rankidx_j(1)), 'k'); hold on;
         plot(mean_alldff,'r');
         ylim([toplotmin, toplotmax]);
+        title('trial with greatest mean df/f (black) and mean of all trials (red)');
+        xlabel('time (frames)');
+        ylabel('df/f');
     subplot(2,2,4); %min mean dff
         plot(all_alldff(rankidx_i(findnan-1),:,rankidx_j(findnan-1)), 'k'); hold on;
         plot(mean_alldff,'r');
         ylim([toplotmin, toplotmax]);
+        xlabel('time (frames)');
+        title('trial with smallest mean df/f (black) and mean of all trials (red)');
+        ylabel('df/f');
