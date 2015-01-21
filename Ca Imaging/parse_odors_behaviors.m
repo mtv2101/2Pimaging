@@ -1,4 +1,4 @@
-function [ALLDAYS, group1_data, group2_data] =  parse_odors_behaviors(...
+function [ALLDAYS, group1_data, group2_data, group1_ids, group2_ids] =  parse_odors_behaviors(...
     ALLBLOCKS, behaviors, group1, group2, odor_types, beh_types, parse_params)
 
 % run this after parseROIs
@@ -131,10 +131,12 @@ end
 group1_data = [];
 for i = 1:length(group1)
     group1_data = cat(1, group1_data, allblocks_parsed.(fieldnames{group1(i)}));
+    group1_ids{i} = fieldnames{group1(i)};
 end
 group2_data = [];
 for i = 1:length(group2)
     group2_data = cat(1, group2_data, allblocks_parsed.(fieldnames{group2(i)}));
+    group2_ids{i} = fieldnames{group2(i)};
 end
 
 ALLDAYS.allblocks = allblocks_parsed;

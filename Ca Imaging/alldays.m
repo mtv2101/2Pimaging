@@ -19,8 +19,8 @@ sig_win = 20; % test for significant changes in windows of this size
 post_x = 10; % multiply sig_win by this to get number of post-baseline frames
 pre_x = 5;
 alpha = .01;
-group1 = (1:4); %odor1:behavior1-4 are 1-4, odor2:behavior1-4 are 5-8; any arbirary grouping works
-group2 = (5:8);
+group1 = (4); %odor1:behavior1-4 are 1-4, odor2:behavior1-4 are 5-8; any arbirary grouping works
+group2 = (6);
 
 parse_params = [triallen, sig_win, post_x, pre_x, alpha];
 
@@ -50,7 +50,7 @@ for day = first_day:numdays+(first_day-1)
         load(behname)
     end
     
-    [alldays_day, group1_data, group2_data] = parse_odors_behaviors(...
+    [alldays_day, group1_data, group2_data, group1_ids, group2_ids] = parse_odors_behaviors(...
         ALLBLOCKS, behaviors, group1, group2, odor_types, beh_types, parse_params);
     
     [alldays_day, ALLBLOCKS] = odor_stats(alldays_day, ALLBLOCKS, sig_win, post_x, pre_x, alpha,...
@@ -60,7 +60,7 @@ for day = first_day:numdays+(first_day-1)
         post_x, pre_x, sig_win, postframes, preframes,group1_data, group2_data);
     
     ALLDAYS(day) = alldays_day;
+    
+    figure;
+    plot_odors(day, ALLDAYS, group1_data, group2_data, rootdir, group1_ids, group2_ids);
 end
-
-figure;
-    plot_odors(day, ALLDAYS, group1_data, group2_data, rootdir);

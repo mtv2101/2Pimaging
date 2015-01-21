@@ -96,8 +96,8 @@ ylabel('roi (ranked)');
 
 sub6 = subplot(3,3,6);axis off;
 text(.1, .9, rootdir, 'Interpreter', 'none', 'Fontsize', 10);
-text(.1, .5, ['Group1 = ' group1_ids], 'Fontsize', 10);
-text(.4, .5, ['Group2 = ' group2_ids], 'Fontsize', 10);
+text(.1, .7, ['odorA = ' group1_ids], 'Fontsize', 10);
+text(.4, .5, ['odorB = ' group2_ids], 'Fontsize', 10);
 
 sub7 = subplot(3,3,7);
 has_anyo1 = zeros(1,size(has_respo1,2));

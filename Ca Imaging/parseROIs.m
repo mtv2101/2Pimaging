@@ -22,7 +22,7 @@ cd(rootdir);
 load 'ALLBLOCKS.mat'
 Filenames = dir(['*block*']);
 %base_win = [20:100]; %frames that define baseline for df/f
-takeforf0 = 0.2; % fraction of lowest-amplitude timeseries data values to average for f0
+takeforf0 = 0.1; % fraction of lowest-amplitude timeseries data values to average for f0
 trial_reject = .5; %reject trials with more than this fraction of discarded frames
 
 all_alldffmean = [];
@@ -129,7 +129,7 @@ figure;
         plot(all_alldff(rankidx_i(1),:,rankidx_j(1)), 'k'); hold on;
         plot(mean_alldff,'r');
         ylim([toplotmin, toplotmax]);
-        title('trial with greatest mean df/f (black) and mean of all trials (red)');
+        title('trial with smallest mean df/f (black) and mean of all trials (red)');
         xlabel('time (frames)');
         ylabel('df/f');
     subplot(2,2,4); %min mean dff
@@ -137,5 +137,5 @@ figure;
         plot(mean_alldff,'r');
         ylim([toplotmin, toplotmax]);
         xlabel('time (frames)');
-        title('trial with smallest mean df/f (black) and mean of all trials (red)');
+        title('trial with greatest mean df/f (black) and mean of all trials (red)');
         ylabel('df/f');
