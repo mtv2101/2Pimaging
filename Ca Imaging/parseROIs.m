@@ -1,4 +1,4 @@
-%written by Matt Valley, 2014
+% written by Matt Valley, 2014
 % This code will fill blank data as NaN
 % gathered after FIJI registratrion and ROI generation.
 % waves from each roi done in FIJI must be saved with filename
@@ -22,7 +22,7 @@ cd(rootdir);
 load 'ALLBLOCKS.mat'
 Filenames = dir(['*block*']);
 %base_win = [20:100]; %frames that define baseline for df/f
-takeforf0 = 0.1; % fraction of lowest-amplitude timeseries data values to average for f0
+takeforf0 = 0.25; % fraction of lowest-amplitude timeseries data values to average for f0
 trial_reject = .5; %reject trials with more than this fraction of discarded frames
 
 all_alldffmean = [];

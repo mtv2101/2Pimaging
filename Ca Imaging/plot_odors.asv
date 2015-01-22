@@ -35,14 +35,19 @@ numsigs = squeeze(nansum(nansum(ns,3),1));
 [s_g2, sortrespo2_indx] = sort(gp2_resp_amp);
 [s_g1g2, sortrespo12_indx] = sort(numsigs);
 
-
-for n = 1:length(ALLDAYS(day).stats) %for each roi
-    has_respo1_sort(:,n) = has_respo1(:,sortrespo12_indx(n));
+num_rois = length(ALLDAYS(day).stats)
+middlerank = ceil(num_rois/2);
+for n = 1:num_rois %for each roi
+    has_respo1_sort(:,n) = has_respo1(:,sortrespo1_indx(n));
     sort_respo1_amp(:,n) = squeeze(nanmean(allblock_1(:,:,sortrespo1_indx(n)),1));
-    has_respo2_sort(:,n) = has_respo2(:,sortrespo12_indx(n));
+    has_respo2_sort(:,n) = has_respo2(:,sortrespo2_indx(n));
     sort_respo2_amp(:,n) = squeeze(nanmean(allblock_2(:,:,sortrespo2_indx(n)),1));
     sort_has_tune(:,n) = has_tune(:,sortrespo12_indx(n));
 end
+has_respo1_upper = has_respo1_sort(:,1:middlerank);
+has_respo1_lower = has_respo1_sort(:,middlerank:end);
+has_respo2_upper = has_respo2_sort(:,1:middlerank);
+has_respo2_lower = has_respo2(:,middlerank:end);
 
 color_map = redblue;
 
@@ -96,24 +101,24 @@ ylabel('roi (ranked)');
 
 sub6 = subplot(3,3,6);axis off;
 text(.1, .9, rootdir, 'Interpreter', 'none', 'Fontsize', 10);
-text(.1, .7, ['odorA = ' group1_ids], 'Fontsize', 10);
-text(.4, .5, ['odorB = ' group2_ids], 'Fontsize', 10);
+text(.1, .5, ['Group1 = ' group1_ids], 'Fontsize', 10);
+text(.4, .5, ['Group2 = ' group2_ids], 'Fontsize', 10);
 
 sub7 = subplot(3,3,7);
-has_anyo1 = zeros(1,size(has_respo1,2));
-has_anyo1(any(has_respo1)) = 1;
-has_anyo1 = logical(has_anyo1);
-has_anyo2 = zeros(1,size(has_respo2,2));
-has_anyo2(any(has_respo2)) = 1;
-has_anyo2 = logical(has_anyo2);
+has_anyo1_up = zeros(1,size(has_respo1_upper,2));
+has_anyo1_up(any(has_respo1_upper)) = 1;
+has_anyo1_up = logical(has_anyo1_up);
+has_anyo2_up = zeros(1,size(has_respo2_upper,2));
+has_anyo2_up(any(has_respo2_upper)) = 1;
+has_anyo2_up = logical(has_anyo2_up);
     if ~isempty(allblock_1)
-        o1mean = squeeze(nanmean(allblock_1(:,:,has_anyo1),3));
+        o1mean = squeeze(nanmean(allblock_1(:,:,has_anyo1_up),3));
         o1mean_nonan = o1mean;
         o1mean_nonan(isnan(o1mean)) = 0; %remove NaNs because they screw up the std function
         o1error = std(o1mean_nonan,[],1)/sqrt(size(o1mean_nonan,1));
     end
     if ~isempty(allblock_2)
-        o2mean = squeeze(nanmean(allblock_2(:,:,has_anyo2),3));
+        o2mean = squeeze(nanmean(allblock_2(:,:,has_anyo2_up),3));
         o2mean_nonan = o2mean;
         o2mean_nonan(isnan(o2mean)) = 0; %remove NaNs because they screw up the std function
         o2error = std(o2mean_nonan,[],1)/sqrt(size(o2mean_nonan,1));

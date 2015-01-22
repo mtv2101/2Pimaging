@@ -35,44 +35,50 @@ numsigs = squeeze(nansum(nansum(ns,3),1));
 [s_g2, sortrespo2_indx] = sort(gp2_resp_amp);
 [s_g1g2, sortrespo12_indx] = sort(numsigs);
 
-
-for n = 1:length(ALLDAYS(day).stats) %for each roi
-    has_respo1_sort(:,n) = has_respo1(:,sortrespo12_indx(n));
+num_rois = length(ALLDAYS(day).stats);
+middlerank = ceil(num_rois/2);
+fill = zeros(size(has_tune,1), middlerank);
+for n = 1:num_rois %for each roi
+    has_respo1_sort(:,n) = has_respo1(:,sortrespo1_indx(n));
     sort_respo1_amp(:,n) = squeeze(nanmean(allblock_1(:,:,sortrespo1_indx(n)),1));
-    has_respo2_sort(:,n) = has_respo2(:,sortrespo12_indx(n));
+    has_respo2_sort(:,n) = has_respo2(:,sortrespo2_indx(n));
     sort_respo2_amp(:,n) = squeeze(nanmean(allblock_2(:,:,sortrespo2_indx(n)),1));
-    sort_has_tune(:,n) = has_tune(:,sortrespo12_indx(n));
+    sort_has_tune(:,n) = has_tune(:,sortrespo1_indx(n));
 end
+has_respo1_upper = cat(2, has_respo1(:,sortrespo1_indx(1:middlerank)), fill);
+has_respo1_lower = cat(2, fill, has_respo1(:,sortrespo1_indx(middlerank+1:end)));
+has_respo2_upper = cat(2, has_respo2(:,sortrespo2_indx(1:middlerank)), fill);
+has_respo2_lower = cat(2, fill, has_respo2(:,sortrespo2_indx(middlerank+1:end)));
 
 color_map = redblue;
 
 axis('fill');
-set(0,'DefaultAxesFontSize',10)
-sub1 = subplot(3,3,1);
+set(0,'DefaultAxesFontSize',10);
+sub1 = subplot(4,3,1);
 jimage(has_respo1_sort'); colormap(flipud(gray));
 sub1cb = colorbar; set(sub1cb,'FontSize',8);
 cbfreeze(sub1cb);freezeColors;
-title('Sig Blocks Odor A vs. baseline');
+title('Sig Blocks Group1 vs. baseline');
 xlabel('time (20 frames)');
 ylabel('roi (ranked)');
 
-sub2 = subplot(3,3,2);
+sub2 = subplot(4,3,2);
 jimage(has_respo2_sort'); colormap(flipud(gray));
 sub2cb = colorbar; set(sub2cb,'FontSize',8);cbfreeze(sub2cb);
 freezeColors;
-title('Sig Blocks Odor B vs. baseline');
+title('Sig Blocks Group2 vs. baseline');
 xlabel('time (20 frames)');
 ylabel('roi (ranked)');
 
-sub3 = subplot(3,3,3);
+sub3 = subplot(4,3,3);
 jimage(sort_has_tune'); colormap(flipud(gray));
 sub3cb = colorbar; set(sub3cb,'FontSize',8);cbfreeze(sub3cb);
 freezeColors;
-title('Tuned Blocks A vs. B');
+title('Tuned Blocks A vs. B (sorted by group1 ranking)');
 xlabel('time (20 frames)');
 ylabel('roi (ranked)');
 
-sub4 = subplot(3,3,4);
+sub4 = subplot(4,3,4);
 cmin = nanmean(sort_respo1_amp(:))-(3*std(sort_respo1_amp(:),[],1));
 cmax = nanmean(sort_respo1_amp(:))+(3*std(sort_respo1_amp(:),[],1));
 imagesc(sort_respo1_amp', [cmin cmax]);
@@ -84,7 +90,7 @@ title('Group1 ranked mean df/f of all trials per roi');
 xlabel('time (20 frames)');
 ylabel('roi (ranked)');
 
-sub5 = subplot(3,3,5);
+sub5 = subplot(4,3,5);
 imagesc(sort_respo2_amp', [cmin cmax]);
 set(gca,'YDir','normal');
 colormap(color_map);freezeColors;
@@ -94,29 +100,37 @@ title('Group2 ranked mean df/f of all trials per roi');
 xlabel('time (20 frames)');
 ylabel('roi (ranked)');
 
-sub6 = subplot(3,3,6);axis off;
+sub6 = subplot(4,3,6);axis off;
 text(.1, .9, rootdir, 'Interpreter', 'none', 'Fontsize', 10);
 text(.1, .5, ['Group1 = ' group1_ids], 'Fontsize', 10);
 text(.4, .5, ['Group2 = ' group2_ids], 'Fontsize', 10);
 
-sub7 = subplot(3,3,7);
-has_anyo1 = zeros(1,size(has_respo1,2));
-has_anyo1(any(has_respo1)) = 1;
-has_anyo1 = logical(has_anyo1);
-has_anyo2 = zeros(1,size(has_respo2,2));
-has_anyo2(any(has_respo2)) = 1;
-has_anyo2 = logical(has_anyo2);
+sub7 = subplot(4,3,7);
+has_anyo1_up = zeros(1,size(has_respo1_upper,2));
+has_anyo1_up(any(has_respo1_upper)) = 1;
+has_anyo1_up = logical(has_anyo1_up);
+has_anyo2_up = zeros(1,size(has_respo2_upper,2));
+has_anyo2_up(any(has_respo2_upper)) = 1;
+has_anyo2_up = logical(has_anyo2_up);
     if ~isempty(allblock_1)
-        o1mean = squeeze(nanmean(allblock_1(:,:,has_anyo1),3));
+        o1mean = squeeze(nanmean(allblock_1(:,:,has_anyo1_up),3));
         o1mean_nonan = o1mean;
         o1mean_nonan(isnan(o1mean)) = 0; %remove NaNs because they screw up the std function
         o1error = std(o1mean_nonan,[],1)/sqrt(size(o1mean_nonan,1));
+        o1mean_o2sig = squeeze(nanmean(allblock_1(:,:,has_anyo2_up),3));
+        o1mean_o2sig_nonan = o1mean_o2sig;
+        o1mean_o2sig_nonan(isnan(o1mean_o2sig)) = 0; %remove NaNs because they screw up the std function
+        o1error_o2sig = std(o1mean_o2sig_nonan,[],1)/sqrt(size(o1mean_o2sig_nonan,1));
     end
     if ~isempty(allblock_2)
-        o2mean = squeeze(nanmean(allblock_2(:,:,has_anyo2),3));
+        o2mean = squeeze(nanmean(allblock_2(:,:,has_anyo2_up),3));
         o2mean_nonan = o2mean;
         o2mean_nonan(isnan(o2mean)) = 0; %remove NaNs because they screw up the std function
         o2error = std(o2mean_nonan,[],1)/sqrt(size(o2mean_nonan,1));
+        o2mean_o1sig = squeeze(nanmean(allblock_2(:,:,has_anyo1_up),3));
+        o2mean_o1sig_nonan = o2mean_o1sig;
+        o2mean_o1sig_nonan(isnan(o2mean_o1sig)) = 0; %remove NaNs because they screw up the std function
+        o2error_o1sig = std(o2mean_o1sig_nonan,[],1)/sqrt(size(o2mean_o1sig_nonan,1));
     end
 cmin2 = nanmean(o1mean(:))-(3*std(o1mean_nonan(:),[],1));
 cmax2 = nanmean(o1mean(:))+(3*std(o1mean_nonan(:),[],1));
@@ -128,33 +142,100 @@ title('Odor A df/f of rois with significant response');
 xlabel('time (frames)');
 ylabel('trial');
 
-sub8 = subplot(3,3,8);
-imagesc(o2mean_nonan, [cmin2 cmax2]);
-set(gca,'YDir','normal');
-sub8cb = colorbar; set(sub8cb,'FontSize',8);cbfreeze(sub8cb);
-colormap(redblue);freezeColors;
-title('Odor B df/f of rois with significant response');
-xlabel('time (frames)');
-ylabel('trial');
-
-sub9 = subplot(3,3,9);
+sub8 = subplot(4,3,8);
 shadedErrorBar([],nanmean(o1mean,1), o1error, {'color', [1, 0.5, 0.2]}, 1);hold on;
-shadedErrorBar([],nanmean(o2mean,1), o2error,  {'color', [.5, .5, 1]}, 1);hold on;
+shadedErrorBar([],nanmean(o2mean_o1sig,1), o2error_o1sig,  {'color', [.5, .5, 1]}, 1);hold on;
 axis tight;
-xLimits = get(sub9,'XLim');
-yLimits = get(sub9,'YLim');
-%h = patch([120; 120; 150; 150], [yLimits(1); yLimits(2); yLimits(2);
-%yLimits(1);], [.7 .7 .7]); Kurt added a variable OdorOnTime and
-%OdorOffTime to allow for different odor presentations
+xLimits = get(sub8,'XLim');
+yLimits = get(sub8,'YLim');
 h = patch([OdorOnTime; OdorOnTime; OdorOffTime; OdorOffTime], [yLimits(1); yLimits(2); yLimits(2); yLimits(1);], [.7 .7 .7]);
 set(h, 'FaceAlpha', .4, 'EdgeColor', 'none');
 hlegend = legend('group1', 'group2');
 hkids = get(hlegend,'Children');    %# Get the legend children
 htext = hkids(strcmp(get(hkids,'Type'),'text')); %# Select the legend children of type 'text'
-% set(htext,{'Color'},{[.5, .5, 1]; [1, 0.5, 0.2]});
-% leg_line=findobj(hlegend,'type','patch');
-% set(leg_line, {'Color'}, {[.5, .5, 1]; [1, 0.5, 0.2]});
-title('A vs. B mean df/f of ROIs with significant response to baseline');
+title('High df/f significant group1 rois versus same rois in group2');
+xlabel('time (frames)');
+ylabel('df/f');
+
+sub9 = subplot(4,3,9);
+shadedErrorBar([],nanmean(o1mean_o2sig,1), o1error_o2sig, {'color', [1, 0.5, 0.2]}, 1);hold on;
+shadedErrorBar([],nanmean(o2mean,1), o2error,  {'color', [.5, .5, 1]}, 1);hold on;
+axis tight;
+xLimits = get(sub9,'XLim');
+yLimits = get(sub9,'YLim');
+h = patch([OdorOnTime; OdorOnTime; OdorOffTime; OdorOffTime], [yLimits(1); yLimits(2); yLimits(2); yLimits(1);], [.7 .7 .7]);
+set(h, 'FaceAlpha', .4, 'EdgeColor', 'none');
+hlegend = legend('group1', 'group2');
+hkids = get(hlegend,'Children');    %# Get the legend children
+htext = hkids(strcmp(get(hkids,'Type'),'text')); %# Select the legend children of type 'text'
+title('High df/f significant group2 rois versus same rois in group1');
+xlabel('time (frames)');
+ylabel('df/f');
+
+sub10 = subplot(4,3,10);
+has_anyo1_low = zeros(1,size(has_respo1_lower,2));
+has_anyo1_low(any(has_respo1_lower)) = 1;
+has_anyo1_low = logical(has_anyo1_low);
+has_anyo2_low = zeros(1,size(has_respo2_lower,2));
+has_anyo2_low(any(has_respo2_lower)) = 1;
+has_anyo2_low = logical(has_anyo2_low);
+    if ~isempty(allblock_1)
+        o1mean = squeeze(nanmean(allblock_1(:,:,has_anyo1_low),3));
+        o1mean_nonan = o1mean;
+        o1mean_nonan(isnan(o1mean)) = 0; %remove NaNs because they screw up the std function
+        o1error = std(o1mean_nonan,[],1)/sqrt(size(o1mean_nonan,1));
+        o1mean_o2sig = squeeze(nanmean(allblock_1(:,:,has_anyo2_low),3));
+        o1mean_o2sig_nonan = o1mean_o2sig;
+        o1mean_o2sig_nonan(isnan(o1mean_o2sig)) = 0; %remove NaNs because they screw up the std function
+        o1error_o2sig = std(o1mean_o2sig_nonan,[],1)/sqrt(size(o1mean_o2sig_nonan,1));
+    end
+    if ~isempty(allblock_2)
+        o2mean = squeeze(nanmean(allblock_2(:,:,has_anyo2_low),3));
+        o2mean_nonan = o2mean;
+        o2mean_nonan(isnan(o2mean)) = 0; %remove NaNs because they screw up the std function
+        o2error = std(o2mean_nonan,[],1)/sqrt(size(o2mean_nonan,1));
+        o2mean_o1sig = squeeze(nanmean(allblock_2(:,:,has_anyo1_low),3));
+        o2mean_o1sig_nonan = o2mean_o1sig;
+        o2mean_o1sig_nonan(isnan(o2mean_o1sig)) = 0; %remove NaNs because they screw up the std function
+        o2error_o1sig = std(o2mean_o1sig_nonan,[],1)/sqrt(size(o2mean_o1sig_nonan,1));
+    end
+cmin2 = nanmean(o1mean(:))-(3*std(o1mean_nonan(:),[],1));
+cmax2 = nanmean(o1mean(:))+(3*std(o1mean_nonan(:),[],1));
+imagesc(o1mean_nonan, [cmin2 cmax2]);
+set(gca,'YDir','normal');
+sub10cb = colorbar; colormap(redblue);set(sub10cb,'FontSize',8);
+cbfreeze(sub10cb);freezeColors;
+title('Odor A df/f of rois with significant response');
+xlabel('time (frames)');
+ylabel('trial');
+
+sub11 = subplot(4,3,11);
+shadedErrorBar([],nanmean(o1mean,1), o1error, {'color', [1, 0.5, 0.2]}, 1);hold on;
+shadedErrorBar([],nanmean(o2mean_o1sig,1), o2error_o1sig,  {'color', [.5, .5, 1]}, 1);hold on;
+axis tight;
+xLimits = get(sub11,'XLim');
+yLimits = get(sub11,'YLim');
+h = patch([OdorOnTime; OdorOnTime; OdorOffTime; OdorOffTime], [yLimits(1); yLimits(2); yLimits(2); yLimits(1);], [.7 .7 .7]);
+set(h, 'FaceAlpha', .4, 'EdgeColor', 'none');
+hlegend = legend('group1', 'group2');
+hkids = get(hlegend,'Children');    %# Get the legend children
+htext = hkids(strcmp(get(hkids,'Type'),'text')); %# Select the legend children of type 'text'
+title('Low df/f significant group1 rois versus same rois in group2');
+xlabel('time (frames)');
+ylabel('df/f');
+
+sub12 = subplot(4,3,12);
+shadedErrorBar([],nanmean(o1mean_o2sig,1), o1error_o2sig, {'color', [1, 0.5, 0.2]}, 1);hold on;
+shadedErrorBar([],nanmean(o2mean,1), o2error,  {'color', [.5, .5, 1]}, 1);hold on;
+axis tight;
+xLimits = get(sub9,'XLim');
+yLimits = get(sub9,'YLim');
+h = patch([OdorOnTime; OdorOnTime; OdorOffTime; OdorOffTime], [yLimits(1); yLimits(2); yLimits(2); yLimits(1);], [.7 .7 .7]);
+set(h, 'FaceAlpha', .4, 'EdgeColor', 'none');
+hlegend = legend('group1', 'group2');
+hkids = get(hlegend,'Children');    %# Get the legend children
+htext = hkids(strcmp(get(hkids,'Type'),'text')); %# Select the legend children of type 'text'
+title('Low df/f significant group2 rois versus same rois in group1');
 xlabel('time (frames)');
 ylabel('df/f');
 

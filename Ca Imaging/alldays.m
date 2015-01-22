@@ -9,7 +9,7 @@ odor_types = {'6EB 4AA', '4EB 6AA'}; % must be 2 odors
 %odor1 = 'HEXANONE';
 %odor2 = 'ETHYL TIG';
 %odor1 = 'VALEDHYD';
-%odor2 = 'CINEOLE';
+%odor2 = 'CINEOLE'; 
 %odor1 = '4EB 6AA';
 %odor2 = '6EB 4AA';
 
@@ -18,11 +18,13 @@ triallen = 300;
 sig_win = 20; % test for significant changes in windows of this size
 post_x = 10; % multiply sig_win by this to get number of post-baseline frames
 pre_x = 5;
-alpha = .01;
-group1 = (4); %odor1:behavior1-4 are 1-4, odor2:behavior1-4 are 5-8; any arbirary grouping works
-group2 = (6);
-
+alpha = .001;
 parse_params = [triallen, sig_win, post_x, pre_x, alpha];
+
+% Assign trials to groups.  
+% Odor1:behavior1-4 are 1-4, odor2:behavior1-4 are 5-8; any arbirary grouping works
+group1 = (1:4); 
+group2 = (5:8);
 
 % load "ALLBLOCKS" and "behaviors"
 [blockname, blockdir, filtindx] = uigetfile('ALLBLOCKS*', 'MultiSelect', 'on');
