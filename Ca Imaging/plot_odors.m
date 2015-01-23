@@ -6,16 +6,16 @@ function plot_odors(day, ALLDAYS, group1_data, group2_data, rootdir, group1_ids,
 ALLROI = 0;
 OdorOnTime = 103; %Frame that odor valve opens
 OdorOffTime = 133; %Frame that odor valve closes
-takewin = 7; %tome window containing odor response data
+takewin = 6:10; %time window containing odor response data
 
 %%%%%%%%% get data
-has_respo1 = [];has_respo2 = [];has_tune = [];gp1_resp_amp = [];gp2_resp_amp = [];
+has_respg1 = [];has_respg2 = [];has_tune = [];gp1_resp_amp = [];gp2_resp_amp = [];
 for roi = 1:length(ALLDAYS(day).stats) % for each roi
-    has_respo1 = cat(2, has_respo1, ALLDAYS(day).stats(roi).sig_o1all);
-    has_respo2 = cat(2, has_respo2, ALLDAYS(day).stats(roi).sig_o2all);
+    has_respg1 = cat(2, has_respg1, ALLDAYS(day).stats(roi).sig_o1all);
+    has_respg2 = cat(2, has_respg2, ALLDAYS(day).stats(roi).sig_o2all);
     has_tune = cat(2, has_tune, ALLDAYS(day).stats(roi).sig_odortuned);
-    gp1_resp_amp = cat(2,gp1_resp_amp, nanmean(ALLDAYS(day).stats(roi).mean_times_gp1(takewin),2));
-    gp2_resp_amp = cat(2,gp2_resp_amp, nanmean(ALLDAYS(day).stats(roi).mean_times_gp2(takewin),2));
+    gp1_resp_amp = cat(2,gp1_resp_amp, nanmean(nanmean(ALLDAYS(day).stats(roi).mean_times_gp1(takewin)),2));
+    gp2_resp_amp = cat(2,gp2_resp_amp, nanmean(nanmean(ALLDAYS(day).stats(roi).mean_times_gp2(takewin)),2));
 end
 allblock_1 = group1_data;
 allblock_2 = group2_data;
@@ -31,31 +31,32 @@ for d = 1:length(ALLDAYS)
     end
 end
 numsigs = squeeze(nansum(nansum(ns,3),1));
-[s_g1, sortrespo1_indx] = sort(gp1_resp_amp);
-[s_g2, sortrespo2_indx] = sort(gp2_resp_amp);
-[s_g1g2, sortrespo12_indx] = sort(numsigs);
+resp_amp_diff = gp1_resp_amp-gp2_resp_amp;
+[s_g1, sortrespg1_indx] = sort(gp1_resp_amp);
+[s_g2, sortrespg2_indx] = sort(gp2_resp_amp);
+[s_gall, sortrespgall_indx] = sort(resp_amp_diff);
 
 num_rois = length(ALLDAYS(day).stats);
-middlerank = ceil(num_rois/2);
-fill = zeros(size(has_tune,1), middlerank);
+quartilerank = ceil(num_rois/4);
+fill = zeros(size(has_tune,1), size(has_tune,2)-quartilerank);
 for n = 1:num_rois %for each roi
-    has_respo1_sort(:,n) = has_respo1(:,sortrespo1_indx(n));
-    sort_respo1_amp(:,n) = squeeze(nanmean(allblock_1(:,:,sortrespo1_indx(n)),1));
-    has_respo2_sort(:,n) = has_respo2(:,sortrespo2_indx(n));
-    sort_respo2_amp(:,n) = squeeze(nanmean(allblock_2(:,:,sortrespo2_indx(n)),1));
-    sort_has_tune(:,n) = has_tune(:,sortrespo1_indx(n));
+    has_respg1_sort(:,n) = has_respg1(:,sortrespg1_indx(n));
+    sort_respg1_amp(:,n) = squeeze(nanmean(allblock_1(:,:,sortrespg1_indx(n)),1));
+    has_respg2_sort(:,n) = has_respg2(:,sortrespg2_indx(n));
+    sort_respg2_amp(:,n) = squeeze(nanmean(allblock_2(:,:,sortrespg2_indx(n)),1));
+    sort_has_tune(:,n) = has_tune(:,sortrespgall_indx(n));
 end
-has_respo1_upper = cat(2, has_respo1(:,sortrespo1_indx(1:middlerank)), fill);
-has_respo1_lower = cat(2, fill, has_respo1(:,sortrespo1_indx(middlerank+1:end)));
-has_respo2_upper = cat(2, has_respo2(:,sortrespo2_indx(1:middlerank)), fill);
-has_respo2_lower = cat(2, fill, has_respo2(:,sortrespo2_indx(middlerank+1:end)));
+has_respg1_upper = cat(2, has_respg1(:,sortrespgall_indx(1:quartilerank)), fill);
+has_respg1_lower = cat(2, fill, has_respg1(:,sortrespgall_indx(end-quartilerank+1:end)));
+has_respg2_upper = cat(2, has_respg2(:,sortrespgall_indx(1:quartilerank)), fill);
+has_respg2_lower = cat(2, fill, has_respg2(:,sortrespgall_indx(end-quartilerank+1:end)));
 
 color_map = redblue;
 
 axis('fill');
 set(0,'DefaultAxesFontSize',10);
 sub1 = subplot(4,3,1);
-jimage(has_respo1_sort'); colormap(flipud(gray));
+jimage(has_respg1_sort'); colormap(flipud(gray));
 sub1cb = colorbar; set(sub1cb,'FontSize',8);
 cbfreeze(sub1cb);freezeColors;
 title('Sig Blocks Group1 vs. baseline');
@@ -63,7 +64,7 @@ xlabel('time (20 frames)');
 ylabel('roi (ranked)');
 
 sub2 = subplot(4,3,2);
-jimage(has_respo2_sort'); colormap(flipud(gray));
+jimage(has_respg2_sort'); colormap(flipud(gray));
 sub2cb = colorbar; set(sub2cb,'FontSize',8);cbfreeze(sub2cb);
 freezeColors;
 title('Sig Blocks Group2 vs. baseline');
@@ -79,9 +80,9 @@ xlabel('time (20 frames)');
 ylabel('roi (ranked)');
 
 sub4 = subplot(4,3,4);
-cmin = nanmean(sort_respo1_amp(:))-(3*std(sort_respo1_amp(:),[],1));
-cmax = nanmean(sort_respo1_amp(:))+(3*std(sort_respo1_amp(:),[],1));
-imagesc(sort_respo1_amp', [cmin cmax]);
+cmin = nanmean(sort_respg1_amp(:))-(3*std(sort_respg1_amp(:),[],1));
+cmax = nanmean(sort_respg1_amp(:))+(3*std(sort_respg1_amp(:),[],1));
+imagesc(sort_respg1_amp', [cmin cmax]);
 set(gca,'YDir','normal');
 colormap(color_map);freezeColors;
 sub4cb = colorbar; set(sub4cb,'FontSize',8);
@@ -91,7 +92,7 @@ xlabel('time (20 frames)');
 ylabel('roi (ranked)');
 
 sub5 = subplot(4,3,5);
-imagesc(sort_respo2_amp', [cmin cmax]);
+imagesc(sort_respg2_amp', [cmin cmax]);
 set(gca,'YDir','normal');
 colormap(color_map);freezeColors;
 sub5cb = colorbar; set(sub5cb,'FontSize',8);
@@ -106,11 +107,11 @@ text(.1, .5, ['Group1 = ' group1_ids], 'Fontsize', 10);
 text(.4, .5, ['Group2 = ' group2_ids], 'Fontsize', 10);
 
 sub7 = subplot(4,3,7);
-has_anyo1_up = zeros(1,size(has_respo1_upper,2));
-has_anyo1_up(any(has_respo1_upper)) = 1;
+has_anyo1_up = zeros(1,size(has_respg1_upper,2));
+has_anyo1_up(any(has_respg1_upper)) = 1;
 has_anyo1_up = logical(has_anyo1_up);
-has_anyo2_up = zeros(1,size(has_respo2_upper,2));
-has_anyo2_up(any(has_respo2_upper)) = 1;
+has_anyo2_up = zeros(1,size(has_respg2_upper,2));
+has_anyo2_up(any(has_respg2_upper)) = 1;
 has_anyo2_up = logical(has_anyo2_up);
     if ~isempty(allblock_1)
         o1mean = squeeze(nanmean(allblock_1(:,:,has_anyo1_up),3));
@@ -173,11 +174,11 @@ xlabel('time (frames)');
 ylabel('df/f');
 
 sub10 = subplot(4,3,10);
-has_anyo1_low = zeros(1,size(has_respo1_lower,2));
-has_anyo1_low(any(has_respo1_lower)) = 1;
+has_anyo1_low = zeros(1,size(has_respg1_lower,2));
+has_anyo1_low(any(has_respg1_lower)) = 1;
 has_anyo1_low = logical(has_anyo1_low);
-has_anyo2_low = zeros(1,size(has_respo2_lower,2));
-has_anyo2_low(any(has_respo2_lower)) = 1;
+has_anyo2_low = zeros(1,size(has_respg2_lower,2));
+has_anyo2_low(any(has_respg2_lower)) = 1;
 has_anyo2_low = logical(has_anyo2_low);
     if ~isempty(allblock_1)
         o1mean = squeeze(nanmean(allblock_1(:,:,has_anyo1_low),3));

@@ -1,17 +1,12 @@
 clear all
 
-cd('C:\Users\supersub\Claire Dropbox\Dropbox\Matlab\Difficult task');
+cd('H:\Analysis drive\August-September 2014\052014-04\2014-11-05 Analysis\Difficult task');
 rootdir = cd;
 ALLROI = 0; % if = 1 plot all data in huge graphs
 
 beh_types = {'HIT', 'CR', 'FA', 'MISS'};
 odor_types = {'6EB 4AA', '4EB 6AA'}; % must be 2 odors
-%odor1 = 'HEXANONE';
-%odor2 = 'ETHYL TIG';
-%odor1 = 'VALEDHYD';
-%odor2 = 'CINEOLE'; 
-%odor1 = '4EB 6AA';
-%odor2 = '6EB 4AA';
+%odor_types = {'VALEDHYD', 'CINEOLE'};
 
 first_day = 1; %if multiple days are selected, this is day of the first selection
 triallen = 300;
