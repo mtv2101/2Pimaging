@@ -1,6 +1,6 @@
 clear all
 
-rootdir = 'G:\Kurt\Raw 2-photon data\2014-05-01 thru 09'; % full path to root directory of your tiff folders
+rootdir = 'D:\2015-Jan-Feb external train study\TIFFS to convert\2015-01-21'; % full path to root directory of your tiff folders
 ImgExtension = '.tif'; % specify image extension
 cd(rootdir);
 List = dir;

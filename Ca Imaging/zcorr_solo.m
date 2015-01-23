@@ -8,9 +8,9 @@
 % Matt Valley, March, 2014
 clear all
 
-rootdir = 'D:\August-September 2014\052014-04\2014-08-29'; % full path to root directory of your tiff stacks
+rootdir = 'D:\2015-Jan-Feb external train study\071114-01\2015-01-21'; % full path to root directory of your tiff stacks
 cd(rootdir);
-xcorrthresh = .64;
+xcorrthresh = .8;
 load('ALLBLOCKS');
 SAVEIMG = 1; % if 1, save single .tif of all z-thresholded images
 %DOMED = 0; % do median filter on final Ca data??? 1=yes    
@@ -30,7 +30,7 @@ for block = 1:length(ALLBLOCKS)
     percent_rej = 100 - (sum(includelist)/length(includelist))*100;
     disp(['block_' num2str(block) ' rejected ' num2str(percent_rej) '% frames']);
 end
-plot_allblocks(ALLBLOCKS, xcorrthresh, percent_rej);
+figure;plot_allblocks(ALLBLOCKS, xcorrthresh, percent_rej);
 save(['ALLBLOCKS.mat'], 'ALLBLOCKS');
 
 %%%%%%%%%%%%%%%%%%%%
