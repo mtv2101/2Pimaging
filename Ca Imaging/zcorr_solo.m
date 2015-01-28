@@ -8,11 +8,11 @@
 % Matt Valley, March, 2014
 clear all
 
-rootdir = 'D:\2015-Jan-Feb external train study\071114-01\2015-01-21'; % full path to root directory of your tiff stacks
+rootdir = 'D:\2015-Jan-Feb external train study\110514-06\2015-01-21'; % full path to root directory of your tiff stacks
 cd(rootdir);
-xcorrthresh = .8;
+xcorrthresh = .7;
 load('ALLBLOCKS');
-SAVEIMG = 1; % if 1, save single .tif of all z-thresholded images
+SAVEIMG = 0; % if 1, save single .tif of all z-thresholded images
 %DOMED = 0; % do median filter on final Ca data??? 1=yes    
 
 %%%%%%%%%%%%%%%%%%%

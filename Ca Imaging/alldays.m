@@ -13,7 +13,8 @@ triallen = 300;
 sig_win = 20; % test for significant changes in windows of this size
 post_x = 10; % multiply sig_win by this to get number of post-baseline frames
 pre_x = 5;
-alpha = .001;
+alpha = .005;
+group_diff_rank = 0.2; % plot this fraction of rois sorted by their difference: group1/group2
 parse_params = [triallen, sig_win, post_x, pre_x, alpha];
 
 % Assign trials to groups.  
@@ -59,5 +60,5 @@ for day = first_day:numdays+(first_day-1)
     ALLDAYS(day) = alldays_day;
     
     figure;
-    plot_odors(day, ALLDAYS, group1_data, group2_data, rootdir, group1_ids, group2_ids);
+    plot_odors(day, ALLDAYS, group1_data, group2_data, rootdir, group1_ids, group2_ids, group_diff_rank);
 end
