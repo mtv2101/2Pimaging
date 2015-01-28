@@ -196,7 +196,7 @@ ylabel('df/f');
 sub10 = subplot(4,3,10);
 cmin2 = nanmean(o1mean(:))-(3*std(o1mean_nonan(:),[],1));
 cmax2 = nanmean(o1mean(:))+(3*std(o1mean_nonan(:),[],1));
-plot(s_g1, [.5, .5, 1]);hold on;plot(s_g2, [1, 0.5, 0.2]);
+plot(s_g1, 'Color', [.5, .5, 1]);hold on;plot(s_g2, 'Color', [1, 0.5, 0.2]);
 set(gca,'YDir','normal');
 title('Ranked rois for each group by mean df/f in odor response window');
 xlabel('ROI#');
